@@ -53,22 +53,28 @@
 
 ### Project Structure
 ```
-Assets/
-├── Scripts/
-│   ├── Core/           # Core game systems
-│   ├── UI/            # UI-related scripts
-│   ├── VR/            # VR-specific functionality
-│   ├── Utils/         # Utility classes
-│   └── Managers/      # Manager classes
-├── Samples/           # Original samples (gitignored)
-├── UsedSamples/       # Modified samples in use
-└── [Other Unity folders]
+Project Root/
+├── Assets/
+│   ├── Scripts/
+│   │   ├── Core/           # Core game systems
+│   │   ├── UI/            # UI-related scripts
+│   │   ├── VR/            # VR-specific functionality
+│   │   ├── Utils/         # Utility classes
+│   │   └── Managers/      # Manager classes
+│   ├── Samples/           # Original samples (gitignored)
+│   ├── UsedSamples/       # Modified samples in use
+│   └── [Other Unity folders]
+├── Docs/                  # Project documentation
+│   ├── CODING_STANDARDS.md
+│   ├── PROMPT_TEMPLATE.md
+│   └── SAMPLES_README.md
+└── [Other project files]
 ```
 
 ### Sample Assets Management
-- Keep original samples in `Samples/` (gitignored)
-- Store modified samples in `UsedSamples/`
-- Document used samples in `SAMPLES_README.md`
+- Keep original samples in `Assets/Samples/` (gitignored)
+- Store modified samples in `Assets/UsedSamples/`
+- Document used samples in `Docs/SAMPLES_README.md`
 - Track modifications to used samples
 
 ## Development Workflow
