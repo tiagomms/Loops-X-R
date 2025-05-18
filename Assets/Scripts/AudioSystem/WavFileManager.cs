@@ -1,80 +1,48 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
+using Utilities;
 using System.IO;
-using eToile;
 
 namespace AudioSystem
 {
     public class WavFileManager : MonoBehaviour
     {
-        private string _directoryPath;
+        [SerializeField] private string projectName = "DefaultProject";
 
-        // TODO: make directory per project
-        [SerializeField] private string directoryName = "Recordings";
+        private IWavFileService _wavService;
+        private string _projectFolder;
 
         private void Awake()
         {
-            // Set up the directory path using persistentDataPath
-            _directoryPath = Path.Combine(Application.persistentDataPath, directoryName);
-
-            if (!Directory.Exists(_directoryPath))
-            {
-                Directory.CreateDirectory(_directoryPath);
-                Debug.Log($"Created recordings directory at: {_directoryPath}");
-            }
-
+            _wavService = new WavFileService(); // In future, swap to DI if needed
+            _projectFolder = Path.Combine("Recordings", projectName);
+            FileUtility.CreateDirectoryIfNotExists(_projectFolder);
         }
 
-        public void SaveClipAsWavFile(AudioClip clip)
+        public void SaveAudio(AudioClip clip)
         {
-            string wavName = AddWavFileExtension(clip.name);
-
-            byte[] wavFile = OpenWavParser.AudioClipToByteArray(clip);
-            File.WriteAllBytes(Path.Combine(_directoryPath, wavName), wavFile);
-            Debug.Log($"File {wavName} created from clip {clip.name}");
+            _wavService.SaveClip(clip, _projectFolder);
         }
 
-        private string AddWavFileExtension(string fileName)
+        public AudioClip LoadAudio(string clipName)
         {
-            if (!fileName.EndsWith(".wav"))
-            {
-                fileName += ".wav";
-            }
-            return fileName;
+            string filePath = Path.Combine(Application.persistentDataPath, _projectFolder, clipName);
+            return _wavService.LoadClip(filePath);
         }
 
-        // File control:
-        public void DeleteWavFile(string wavName)
+        public void DeleteAudio(string clipName)
         {
-            File.Delete(Path.Combine(_directoryPath, AddWavFileExtension(wavName)));
-            Debug.Log($"File {wavName} deleted");
+            string filePath = Path.Combine(Application.persistentDataPath, _projectFolder, clipName);
+            _wavService.DeleteClip(filePath);
         }
 
-        public AudioClip LoadWavFile(string wavName)
+        public void ClearProjectFolder()
         {
-            string filePath = Path.Combine(_directoryPath, AddWavFileExtension(wavName));
-            if (File.Exists(filePath))
-            {
-                byte[] wavFile = File.ReadAllBytes(filePath);
-                Debug.Log($"File {wavName} loaded");
-                return OpenWavParser.ByteArrayToAudioClip(wavFile);
-            }
-
-            Debug.Log($"LoadWavFile not possible - File {wavName} not found");
-            return null;
+            FileUtility.DeleteDirectory(_projectFolder);
         }
 
-        // TODO: for prototype only (to not overflow) - in the future create a management system
-        void OnDestroy()
+        private void OnDestroy()
         {
-            ClearRecordings();
-        }
-
-        public void ClearRecordings()
-        {
-            if (!Directory.Exists(_directoryPath)) return;
-            Directory.Delete(_directoryPath, true);
-            Debug.Log("Directory Reset clean");
+            ClearProjectFolder(); // ⚠️ for prototyping only
         }
     }
 }
