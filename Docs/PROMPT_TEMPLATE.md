@@ -12,6 +12,12 @@
 - AI will provide prompt suggestions for better communication
 - AI will store "future considerations" for later discussion
 - AI will prioritize tasks based on user's "let's prioritize/do this first" statements
+- AI will use consistent bullet point numbering:
+  - Use sequential numbers (1, 2, 3...) for main points
+  - Use letters (a, b, c...) for sub-points
+  - Use roman numerals (i, ii, iii...) for detailed sub-points
+  - Never reuse numbers within the same context
+  - Maintain hierarchy in nested lists
 
 ### Code Quality Standards
 - Follow SOLID principles unless explicitly stated otherwise
