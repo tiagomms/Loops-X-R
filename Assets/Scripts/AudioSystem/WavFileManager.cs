@@ -67,8 +67,14 @@ namespace AudioSystem
         // TODO: for prototype only (to not overflow) - in the future create a management system
         void OnDestroy()
         {
+            ClearRecordings();
+        }
+
+        public void ClearRecordings()
+        {
             if (!Directory.Exists(_directoryPath)) return;
             Directory.Delete(_directoryPath);
+            Debug.Log("Directory Reset clean");
         }
     }
 }
