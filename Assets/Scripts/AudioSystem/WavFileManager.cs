@@ -73,7 +73,7 @@ namespace AudioSystem
         public void ClearRecordings()
         {
             if (!Directory.Exists(_directoryPath)) return;
-            Directory.Delete(_directoryPath);
+            Directory.Delete(_directoryPath, true);
             Debug.Log("Directory Reset clean");
         }
     }
