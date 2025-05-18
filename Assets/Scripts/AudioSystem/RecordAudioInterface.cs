@@ -55,17 +55,17 @@ public class RecordAudioInterface : MonoBehaviour
 
     public void SaveRecording()
     {
-        wavFileManager.SaveClipAsWavFile(audioSource.clip);
+        wavFileManager.SaveAudio(audioSource.clip);
     }
 
     public void DeleteRecording()
     {
-        wavFileManager.DeleteWavFile(audioSource.clip.name);
+        wavFileManager.DeleteAudio(audioSource.clip.name);
     }
 
     public void LoadRecordingIntoAudioSource(string fileName)
     {
-        AssignClipToAudioSource(wavFileManager.LoadWavFile(fileName));
+        AssignClipToAudioSource(wavFileManager.LoadAudio(fileName));
     }
 
     public void EnableSound(bool isSoundOn)

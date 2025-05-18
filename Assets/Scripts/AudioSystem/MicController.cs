@@ -4,12 +4,17 @@ namespace AudioSystem
 {
     public class MicController : MonoBehaviour
     {
-        public bool IsWorking = false;
         private float _recordingLength;
         private AudioClip _recordedClip;
         private float _startTime;
 
         public AudioClip RecordedClip => _recordedClip;
+
+        [Header("Debug")]
+        [SerializeField] private bool isWorking = false;
+        [Tooltip("Set respective index - wait for Awake method to know which one to select. In production - this value is ignored to default value 0")]
+        [SerializeField] private int micDeviceIndex = 1;
+        private int _micIndex = 0;
 
         private void Awake()
         {
@@ -17,17 +22,21 @@ namespace AudioSystem
             {
                 Debug.Log($"Device name {i}: {Microphone.devices[i]}");
             }
+
+            #if UNITY_EDITOR
+            _micIndex = micDeviceIndex; // NOTE: whatever you set on debug, usually is 0 (for deployment)
+            #endif
         }
 
 
         public void WorkStart()
         {
-            if (IsWorking) return;
+            if (isWorking) return;
 
 #if !UNITY_WEBGL
-            IsWorking = true;
+            isWorking = true;
 
-            string device = Microphone.devices[0];
+            string device = Microphone.devices[_micIndex];
             int sampleRate = 44100;
             int lengthSec = 3599;
 
@@ -40,10 +49,10 @@ namespace AudioSystem
 
         public AudioClip WorkStop()
         {
-            if (!IsWorking) return _recordedClip;
+            if (!isWorking) return _recordedClip;
 
 #if !UNITY_WEBGL
-            IsWorking = false;
+            isWorking = false;
             Microphone.End(null);
             _recordingLength = Time.realtimeSinceStartup - _startTime;
             _recordedClip = TrimClip(_recordedClip, _recordingLength);
@@ -63,7 +72,7 @@ namespace AudioSystem
 
             // Create arrays for each channel
             float[] data = new float[samples * clip.channels];
-            
+
             // Get the audio data
             if (!clip.GetData(data, 0))
             {
