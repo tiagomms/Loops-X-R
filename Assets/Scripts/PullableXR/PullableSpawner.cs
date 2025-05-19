@@ -1,11 +1,14 @@
 using UnityEngine;
 using UnityEngine.Events;
 using DG.Tweening;
+using Oculus.Interaction.Input;
+using Oculus.Interaction.HandGrab;
 
 namespace PullableXR
 {
     /// <summary>
-    /// Main class attached to the spawner. Handles instantiation and pull interaction of prefab objects.
+    /// Responsible for spawning pullable instances when a pinch is detected near the spawner.
+    /// The spawner itself is static and does not move. Tracks and manages active pullable instance.
     /// </summary>
     public class PullableSpawner : MonoBehaviour
     {
@@ -23,7 +26,7 @@ namespace PullableXR
         [SerializeField] private float maxScale = 1f;
 
         [Header("Layer Settings")]
-        [SerializeField] private string temporaryLayerName = "TempUninteractive";
+        [SerializeField] private string temporaryLayerName = "Uninteractive";
 
         [Header("Events")]
         public UnityEvent onConfirm;
@@ -32,9 +35,10 @@ namespace PullableXR
         private PullableInstance activeInstance;
 
         /// <summary>
-        /// Call this method when the user pinches or grabs the spawner to trigger the pull interaction.
+        /// Called when a pinch gesture is detected inside this spawner's trigger collider.
+        /// Instantiates and initializes a new pullable instance.
         /// </summary>
-        public void TriggerPull(Transform handTransform)
+        public void TriggerPull(Transform handTransform, HandGrabInteractor interactor)
         {
             if (activeInstance != null) return;
 
@@ -46,12 +50,25 @@ namespace PullableXR
             spawnedT.LookAt(Camera.main.transform);
             spawnedT.localScale = Vector3.one * minScale;
 
+            // Attach the PullableInstance logic and initialize behavior.
             activeInstance = spawned.AddComponent<PullableInstance>();
-            activeInstance.Initialize(this, spawnedT, spawnPos, handTransform, confirmDistance, minScale, maxScale, failedReleaseDuration, failedReleaseEase, temporaryLayerName);
+            activeInstance.Initialize(
+                spawner: this,
+                instanceT: spawnedT,
+                initialPos: spawnPos,
+                handT: handTransform,
+                interactor: interactor,
+                confirmDistance: confirmDistance,
+                minScale: minScale,
+                maxScale: maxScale,
+                failedDuration: failedReleaseDuration,
+                failedEase: failedReleaseEase,
+                temporaryLayerName: temporaryLayerName
+            );
         }
 
         /// <summary>
-        /// Call this when the user releases the pinch. It finalizes the interaction.
+        /// Called externally by the active PullableInstance when the user releases their pinch.
         /// </summary>
         public void Release()
         {
@@ -62,14 +79,61 @@ namespace PullableXR
             }
         }
 
+        /// <summary>
+        /// Called by the PullableInstance to confirm the pull succeeded.
+        /// </summary>
         public void HandleConfirm()
         {
             onConfirm?.Invoke();
         }
 
+        /// <summary>
+        /// Called by the PullableInstance to notify pull was cancelled.
+        /// </summary>
         public void HandleCancel()
         {
             onCancel?.Invoke();
+        }
+
+        /// <summary>
+        /// When a collider enters the trigger, try to detect the Hand and register pinch callbacks.
+        /// </summary>
+        private void OnTriggerEnter(Collider other)
+        {
+            Hand hand = other.GetComponentInParent<Hand>();
+            if (hand != null)
+            {
+                HandPinchDetector pinchDetector = hand.GetComponent<HandPinchDetector>();
+                if (pinchDetector == null)
+                {
+                    pinchDetector = hand.gameObject.AddComponent<HandPinchDetector>();
+                }
+
+                HandGrabInteractor interactor = hand.GetComponentInChildren<HandGrabInteractor>();
+                if (interactor != null)
+                {
+                    pinchDetector.SetCallbacks(
+                        onPinch: () => TriggerPull(hand.transform, interactor),
+                        onRelease: () => Release()
+                    );
+                }
+            }
+        }
+
+        /// <summary>
+        /// Unregister pinch callbacks when the hand exits the trigger collider.
+        /// </summary>
+        private void OnTriggerExit(Collider other)
+        {
+            Hand hand = other.GetComponentInParent<Hand>();
+            if (hand != null)
+            {
+                HandPinchDetector pinchDetector = hand.GetComponent<HandPinchDetector>();
+                if (pinchDetector != null)
+                {
+                    pinchDetector.ClearCallbacks();
+                }
+            }
         }
     }
 }

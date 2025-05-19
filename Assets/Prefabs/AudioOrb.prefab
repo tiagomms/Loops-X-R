@@ -457,7 +457,6 @@ GameObject:
   - component: {fileID: 1295866326620019223}
   - component: {fileID: 1716152117123489167}
   - component: {fileID: 5091034137894294898}
-  - component: {fileID: 2353507720248849714}
   m_Layer: 0
   m_Name: '[BuildingBlock] HandGrab'
   m_TagString: Untagged
@@ -586,26 +585,6 @@ MonoBehaviour:
   _releaseDistance: 0
   _resetGrabOnGrabsUpdated: 1
   _physicsGrabbable: {fileID: 0}
---- !u!114 &2353507720248849714
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6760806704010590351}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cb4a09355f9dc244bfbcd2ac9208ef7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _interactorFilters: []
-  _maxInteractors: -1
-  _maxSelectingInteractors: -1
-  _data: {fileID: 0}
-  _pointableElement: {fileID: 1295866326620019223}
-  _boundsCollider: {fileID: 7143803258807248553}
-  _colliders:
-  - {fileID: 5906816419274040791}
 --- !u!1001 &961376519274145861
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -710,10 +689,5 @@ SphereCollider:
 --- !u!4 &5906816419274040790 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6678351048294960531, guid: 6a505ff61adb73345a84d0bde8d53c55, type: 3}
-  m_PrefabInstance: {fileID: 961376519274145861}
-  m_PrefabAsset: {fileID: 0}
---- !u!135 &5906816419274040791 stripped
-SphereCollider:
-  m_CorrespondingSourceObject: {fileID: 6678351048294960530, guid: 6a505ff61adb73345a84d0bde8d53c55, type: 3}
   m_PrefabInstance: {fileID: 961376519274145861}
   m_PrefabAsset: {fileID: 0}

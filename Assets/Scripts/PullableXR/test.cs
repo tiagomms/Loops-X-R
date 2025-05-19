@@ -4,7 +4,7 @@ using DG.Tweening;
 
 namespace PullableXR
 {
-    public class PullableSpawnerOld01 : MonoBehaviour
+    public class PullableSpawnerOld02 : MonoBehaviour
     {
         [Header("Prefab Settings")]
         [SerializeField] private GameObject pullablePrefab;
@@ -23,7 +23,7 @@ namespace PullableXR
         public UnityEvent onConfirm;
         public UnityEvent onCancel;
 
-        private PullableInstanceOld01 activeInstance;
+        private PullableInstanceOld02 activeInstance;
 
         public void TriggerPull(Transform handTransform)
         {
@@ -38,7 +38,7 @@ namespace PullableXR
             spawnedT.LookAt(Camera.main.transform);
             spawnedT.localScale = Vector3.one * minScale;
 
-            activeInstance = spawned.AddComponent<PullableInstanceOld01>();
+            activeInstance = spawned.AddComponent<PullableInstanceOld02>();
             activeInstance.Initialize(this, spawnedT, spawnPos, handTransform, confirmDistance, minScale, maxScale, failedReleaseDuration, failedReleaseEase);
         }
 
@@ -62,9 +62,9 @@ namespace PullableXR
         }
     }
 
-    public class PullableInstanceOld01 : MonoBehaviour
+    public class PullableInstanceOld02 : MonoBehaviour
     {
-        private PullableSpawnerOld01 spawner;
+        private PullableSpawnerOld02 spawner;
         private Transform instanceT;
         private Transform handT;
         private Vector3 initialPos;
@@ -75,7 +75,7 @@ namespace PullableXR
         private Ease failedEase;
         private bool isReleased;
 
-        public void Initialize(PullableSpawnerOld01 spawner, Transform instanceT, Vector3 initialPos, Transform handT, float confirmDistance, float minScale, float maxScale, float failedDuration, Ease failedEase)
+        public void Initialize(PullableSpawnerOld02 spawner, Transform instanceT, Vector3 initialPos, Transform handT, float confirmDistance, float minScale, float maxScale, float failedDuration, Ease failedEase)
         {
             this.spawner = spawner;
             this.instanceT = instanceT;

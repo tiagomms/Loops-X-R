@@ -1,120 +1,187 @@
 using UnityEngine;
 using DG.Tweening;
-using System.Collections.Generic;
 using Oculus.Interaction;
+using Oculus.Interaction.HandGrab;
 
 namespace PullableXR
 {
-
     /// <summary>
-    /// Runtime logic for a single pull instance. Manages scaling, layer handling, and confirmation logic.
+    /// Represents the actual spawned object during a pull gesture.
+    /// Handles grabbing, releasing, scale animation, and interaction disabling logic.
     /// </summary>
     public class PullableInstance : MonoBehaviour
     {
         private PullableSpawner spawner;
-        private Transform instanceT;
-        private Transform handT;
-        private Vector3 initialPos;
+        private Transform instanceTransform;
+        private Transform handTransform;
+        private HandGrabInteractor interactor;
+
         private float confirmDistance;
         private float minScale;
         private float maxScale;
         private float failedDuration;
         private Ease failedEase;
-        private bool isReleased;
-        private int tempLayer;
-        private Dictionary<Transform, int> originalLayers = new Dictionary<Transform, int>();
+
+        private string originalLayerName;
+        private int[] originalLayers;
+        private string temporaryLayerName;
+        private bool hasBeenConfirmed = false;
+
+        private InteractableUnityEventWrapper _eventWrapper;
+
+        private void Start()
+        {
+            AttachToHand();
+        }
 
         /// <summary>
-        /// Initializes the pull instance with parameters from the spawner.
+        /// Initializes this instance with all required references and parameters.
         /// </summary>
-        public void Initialize(PullableSpawner spawner, Transform instanceT, Vector3 initialPos, Transform handT, float confirmDistance, float minScale, float maxScale, float failedDuration, Ease failedEase, string temporaryLayerName)
+        public void Initialize(
+            PullableSpawner spawner,
+            Transform instanceT,
+            Vector3 initialPos,
+            Transform handT,
+            HandGrabInteractor interactor,
+            float confirmDistance,
+            float minScale,
+            float maxScale,
+            float failedDuration,
+            Ease failedEase,
+            string temporaryLayerName
+        )
         {
             this.spawner = spawner;
-            this.instanceT = instanceT;
-            this.initialPos = initialPos;
-            this.handT = handT;
+            this.instanceTransform = instanceT;
+            this.handTransform = handT;
+            this.interactor = interactor;
             this.confirmDistance = confirmDistance;
             this.minScale = minScale;
             this.maxScale = maxScale;
             this.failedDuration = failedDuration;
             this.failedEase = failedEase;
-            isReleased = false;
+            this.temporaryLayerName = temporaryLayerName;
 
-            tempLayer = LayerMask.NameToLayer(temporaryLayerName);
-            StoreAndSetLayerRecursive(instanceT);
-
-            // Optional: Hook into Meta XR SDK's GrabInteractable events
-            InteractableUnityEventWrapper grab = instanceT.GetComponentInChildren<InteractableUnityEventWrapper>();
-            if (grab != null)
-            {
-                grab.WhenSelect.AddListener(OnGrab);
-                grab.WhenUnselect.AddListener(OnRelease);
-            }
-        }
-
-        private void StoreAndSetLayerRecursive(Transform root)
-        {
-            foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
-            {
-                originalLayers[child] = child.gameObject.layer;
-                child.gameObject.layer = tempLayer;
-            }
-        }
-
-        private void RestoreOriginalLayers()
-        {
-            foreach (var kvp in originalLayers)
-            {
-                if (kvp.Key != null)
-                {
-                    kvp.Key.gameObject.layer = kvp.Value;
-                }
-            }
+            //StoreAndReplaceLayers();
         }
 
         private void Update()
         {
-            if (isReleased) return;
+            if (hasBeenConfirmed) return;
 
-            instanceT.position = handT.position;
-            float distance = Vector3.Distance(instanceT.position, spawner.transform.position);
+            instanceTransform.position = handTransform.position;
+            float distance = Vector3.Distance(instanceTransform.position, spawner.transform.position);
 
             float t = Mathf.Clamp01(distance / confirmDistance);
             float scaleValue = Mathf.Lerp(minScale, maxScale, t);
-            instanceT.localScale = Vector3.one * scaleValue;
+            instanceTransform.localScale = Vector3.one * scaleValue;
         }
 
         /// <summary>
-        /// Called when the object is released. Handles confirm or cancel logic.
+        /// Called when the user stops pinching.
+        /// Determines whether the object is confirmed or cancelled.
         /// </summary>
         public void Release()
         {
-            if (isReleased) return;
-            isReleased = true;
-
-            float distance = Vector3.Distance(instanceT.position, spawner.transform.position);
-
-            if (distance >= confirmDistance)
+            float dist = Vector3.Distance(instanceTransform.position, spawner.transform.position);
+            if (dist >= confirmDistance)
             {
-                RestoreOriginalLayers();
-                instanceT.localScale = Vector3.one * maxScale;
-                spawner.HandleConfirm();
+                Confirm();
             }
             else
             {
-                Sequence cancelSeq = DOTween.Sequence();
-                cancelSeq.Join(instanceT.DOMove(initialPos, failedDuration).SetEase(failedEase));
-                cancelSeq.Join(instanceT.DOScale(Vector3.one * minScale, failedDuration).SetEase(failedEase));
-                cancelSeq.OnComplete(() => Destroy(gameObject));
+                Cancel();
+            }
+            //ResetEventWrapper();
+        }
 
-                spawner.HandleCancel();
+        /// <summary>
+        /// Finalizes the pull, re-enabling interaction and calling confirm logic.
+        /// </summary>
+        private void Confirm()
+        {
+            if (hasBeenConfirmed) return;
+            hasBeenConfirmed = true;
+            instanceTransform.localScale = Vector3.one * maxScale;
+
+            //RestoreOriginalLayers();
+            spawner.HandleConfirm();
+
+            enabled = false;
+        }
+
+        /// <summary>
+        /// Cancels the pull with animation and destroys the instance.
+        /// </summary>
+        private void Cancel()
+        {
+            Sequence cancelSeq = DOTween.Sequence();
+            cancelSeq.Join(instanceTransform.DOMove(spawner.transform.position, failedDuration).SetEase(failedEase));
+            cancelSeq.Join(instanceTransform.DOScale(Vector3.one * minScale, failedDuration).SetEase(failedEase));
+            cancelSeq.OnComplete(() => Destroy(gameObject));
+
+            spawner.HandleCancel();
+        }
+
+        /// <summary>
+        /// Attempts to attach this instance to the interactor hand.
+        /// </summary>
+        private void AttachToHand()
+        {
+            var handGrabInteractable = GetComponentInChildren<HandGrabInteractable>();
+            if (handGrabInteractable == null)
+            {
+                Debug.LogWarning($"Can't attach to hand pullable instance, no hand grab interactable in prefab");
+                return;
+            }
+
+            /*
+            if (TryGetComponent(out _eventWrapper))
+            {
+                // TODO: add release here, make sure these events are removed on release
+                _eventWrapper.WhenSelect.AddListener(() => { });
+                _eventWrapper.WhenUnselect.AddListener(() => { });
+            }
+            */
+
+            interactor.ForceSelect(handGrabInteractable);
+        }
+
+        /// <summary>
+        /// Stores all original layers and replaces them with a temporary uninteractive one.
+        /// </summary>
+        private void StoreAndReplaceLayers()
+        {
+            int tempLayer = LayerMask.NameToLayer(temporaryLayerName);
+            if (tempLayer < 0) tempLayer = 0;
+
+            var all = GetComponentsInChildren<Transform>(true);
+            originalLayers = new int[all.Length];
+            for (int i = 0; i < all.Length; i++)
+            {
+                originalLayers[i] = all[i].gameObject.layer;
+                all[i].gameObject.layer = tempLayer;
             }
         }
 
         /// <summary>
-        /// Optional: Hooks for Meta XR's GrabInteractable. If supported, these can automatically drive pull and release.
+        /// Restores the original layers on all child objects.
         /// </summary>
-        private void OnGrab() => spawner.TriggerPull(handT);
-        private void OnRelease() => spawner.Release();
+        private void RestoreOriginalLayers()
+        {
+            var all = GetComponentsInChildren<Transform>(true);
+            for (int i = 0; i < all.Length; i++)
+            {
+                all[i].gameObject.layer = originalLayers[i];
+            }
+        }
+
+        private void ResetEventWrapper()
+        {
+            if (!_eventWrapper) return;
+            _eventWrapper.WhenSelect.RemoveListener(() => { });
+            _eventWrapper.WhenUnselect.RemoveListener(() => { });
+        }
+
     }
 }
