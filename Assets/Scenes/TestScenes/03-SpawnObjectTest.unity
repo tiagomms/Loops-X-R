@@ -12364,7 +12364,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87dfe85a05579084fa913a7f405b2b00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  triggerCollider: {fileID: 436512583}
   pullablePrefab: {fileID: 3084155293571431554, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
   spawnOffset: {x: 0, y: 0.1, z: 0}
   confirmDistance: 0.3
@@ -25827,10 +25826,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1569570310}
     m_Modifications:
-    - target: {fileID: 1295866326620019223, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
-      propertyPath: _throwWhenUnselected
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 3084155293571431554, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
       propertyPath: m_Name
       value: AudioOrb (2)
@@ -25874,14 +25869,6 @@ PrefabInstance:
     - target: {fileID: 5143820273989300806, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6675292758131569664, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8749827756388647295, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
-      propertyPath: m_Drag
-      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -27957,7 +27944,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.0000076293945, y: 217.00018}
+  m_AnchoredPosition: {x: -0.0000076293945, y: 217.00023}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1094948356
@@ -42832,6 +42819,7 @@ GameObject:
   - component: {fileID: 1756739515}
   - component: {fileID: 1756739519}
   - component: {fileID: 1756739520}
+  - component: {fileID: 1756739521}
   m_Layer: 0
   m_Name: '[BuildingBlock] HandGrab'
   m_TagString: Untagged
@@ -43082,6 +43070,19 @@ MonoBehaviour:
   _whenSelectingInteractorViewRemoved:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1756739521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756739513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1b3bdc597399a148be97aad337a9130, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetJoint: {fileID: 0}
 --- !u!1 &1757843586
 GameObject:
   m_ObjectHideFlags: 0
@@ -46469,7 +46470,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1244059969}
   m_HandleRect: {fileID: 1244059968}
   m_Direction: 2
-  m_Value: -0.000000914121
+  m_Value: -0.000001125072
   m_Size: 0.27666667
   m_NumberOfSteps: 0
   m_OnValueChanged:

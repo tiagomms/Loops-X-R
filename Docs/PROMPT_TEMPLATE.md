@@ -127,10 +127,55 @@
 - Comprehensive inline comments
 - Error checking and type validation
 - Strict TypeScript notation (when applicable)
+- Code Readability Standards:
+  - Prefer abstract classes over interfaces when:
+    a. The implementation is closely related
+    b. There's shared functionality
+    c. The behavior is specific to the domain
+    d. You want to provide default implementations
+  - Use interfaces when:
+    a. Multiple inheritance is needed
+    b. The contract is very generic
+    c. The implementation is completely different
+    d. You want to define a pure contract
+  - Code organization guidelines:
+    1. Group related functionality
+    2. Use clear, descriptive names
+    3. Keep methods focused and small
+    4. Use consistent patterns
+    5. Document design decisions
+  - Common patterns to consider:
+    a. Abstract base classes for shared behavior
+    b. Interface segregation for specific contracts
+    c. Template method pattern for algorithm structure
+    d. Strategy pattern for interchangeable behaviors
+  - Documentation requirements:
+    1. Explain why a pattern was chosen
+    2. Document any deviations from standards
+    3. Provide usage examples
+    4. Include design considerations
 - String standards:
   - Use double quotes (`"`)
   - Use string templates or `.join()`
   - No operational concatenation
+- Error Handling Standards:
+  - Always include stack traces in error logs
+  - Re-throw exceptions to maintain error context
+  - Use specific exception types when possible
+  - Include component/object names in error messages
+  - Log errors at the point of occurrence
+  - Avoid catching and swallowing exceptions
+  - Use try-catch blocks only when necessary
+  - Document expected exceptions in XML comments
+  - Follow this error message format:
+    ```csharp
+    Debug.LogError($"[{nameof(ClassName)}] Error in {methodName} for {objectName}: {e.Message}\nStack Trace: {e.StackTrace}");
+    ```
+  - Error handling hierarchy:
+    1. Log the error with full context
+    2. Re-throw to maintain stack trace
+    3. Let higher-level handlers decide recovery
+    4. Document error handling in XML comments
 - Game Design Patterns:
   - Solutions should follow industry standard game dev patterns
   - Each pattern choice must be justified with a brief explanation

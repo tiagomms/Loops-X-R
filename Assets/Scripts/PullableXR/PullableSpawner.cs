@@ -5,20 +5,18 @@ using Oculus.Interaction.Input;
 using Oculus.Interaction.HandGrab;
 using Unity.VisualScripting;
 using System.Collections.Generic;
+using System;
 
 namespace PullableXR
 {
     /// <summary>
     /// Manages the spawning and tracking of pullable instances in response to pinch gestures.
     /// Supports multiple simultaneous pulls from different pinch detectors.
+    /// Implements the Template Method pattern for behavior management.
     /// </summary>
     public class PullableSpawner : MonoBehaviour
     {
         #region Fields
-        [Header("Collider")]
-        [SerializeField, Tooltip("Trigger collider for detecting pinch interactions")]
-        private Collider triggerCollider;
-
         [Header("Prefab Settings")]
         [SerializeField, Tooltip("Prefab to instantiate when pulling")]
         private GameObject pullablePrefab;
@@ -87,10 +85,11 @@ namespace PullableXR
                 GameObject spawned = Instantiate(pullablePrefab);
                 Transform spawnedT = spawned.transform;
 
-                Vector3 spawnPos = transform.position + spawnOffset;
-                spawnedT.position = spawnPos;
+
+                //Vector3 spawnPos = transform.position + spawnOffset;
+                //spawnedT.position = spawnPos;
                 spawnedT.LookAt(Camera.main.transform);
-                spawnedT.localScale = Vector3.one * minScale;
+                //spawnedT.localScale = Vector3.one * minScale;
 
                 var instance = spawned.AddComponent<PullableInstance>();
                 instance.Initialize(
@@ -115,7 +114,8 @@ namespace PullableXR
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[{nameof(PullableSpawner)}] Error creating pullable instance: {e.Message}");
+                Debug.LogError($"[{nameof(PullableSpawner)}] Error creating pullable instance: {e.Message}\nStack Trace: {e.StackTrace}");
+                throw;
             }
         }
 
@@ -124,23 +124,38 @@ namespace PullableXR
         /// </summary>
         public void Release(HandPinchDetector pullingPinch)
         {
-            if (_activeInstances.TryGetValue(pullingPinch, out var instance))
+            if (!_activeInstances.TryGetValue(pullingPinch, out var instance))
             {
-                try
+                if (logPullEvents)
                 {
-                    instance.Release();
-                    if (logPullEvents)
-                    {
-                        XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] Release from {pullingPinch.gameObject.name}. Remaining pulls: {_activeInstances.Count}/{maxSimultaneousPulls}");
-                    }
+                    XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] No active instance found for {pullingPinch.gameObject.name}");
+                }
+                return;
+            }
 
-                    ClearPinchDetectorCallbacks(pullingPinch);
-                    _activeInstances.Remove(pullingPinch);
-                }
-                catch (System.Exception e)
+            // Store instance reference before any operations that might destroy it
+            var instanceRef = instance;
+            
+            // Clear callbacks first to prevent any further interactions
+            ClearPinchDetectorCallbacks(pullingPinch);
+            
+            // Remove from active instances before calling Release
+            _activeInstances.Remove(pullingPinch);
+
+            try
+            {
+                // Now call Release which might destroy the instance
+                instanceRef.Release();
+
+                if (logPullEvents)
                 {
-                    Debug.LogError($"[{nameof(PullableSpawner)}] Error releasing pullable instance: {e.Message}");
+                    XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] Release from {pullingPinch.gameObject.name}. Remaining pulls: {_activeInstances.Count}/{maxSimultaneousPulls}");
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[{nameof(PullableSpawner)}] Error in Release for {pullingPinch.gameObject.name}: {e.Message}\nStack Trace: {e.StackTrace}");
+                throw; // Re-throw to maintain error context
             }
         }
 
@@ -150,7 +165,6 @@ namespace PullableXR
         public void HandleConfirm()
         {
             onConfirm?.Invoke();
-
         }
 
         /// <summary>

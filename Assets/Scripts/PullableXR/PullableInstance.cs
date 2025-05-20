@@ -2,12 +2,15 @@ using UnityEngine;
 using DG.Tweening;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
+using System;
+using System.Collections.Generic;
 
 namespace PullableXR
 {
     /// <summary>
     /// Represents the actual spawned object during a pull gesture.
     /// Handles grabbing, releasing, scale animation, and interaction disabling logic.
+    /// Implements the Observer pattern for behavior notifications.
     /// </summary>
     public class PullableInstance : MonoBehaviour
     {
@@ -28,14 +31,17 @@ namespace PullableXR
         private bool hasBeenConfirmed = false;
 
         private Rigidbody _rb;
-
         private InteractableUnityEventWrapper _eventWrapper;
         private HandGrabInteractable _interactable;
+        private readonly List<PullableBehavior> _behaviors = new();
 
         private void Start()
         {
             _rb = GetComponentInParent<Rigidbody>();
             _interactable = GetComponentInChildren<HandGrabInteractable>();
+            
+            // Get all behaviors from this GameObject and its children
+            _behaviors.AddRange(GetComponentsInChildren<PullableBehavior>());
             
             AttachToHand();
         }
@@ -112,6 +118,7 @@ namespace PullableXR
 
         /// <summary>
         /// Finalizes the pull, re-enabling interaction and calling confirm logic.
+        /// Notifies all registered behaviors of the confirmation.
         /// </summary>
         private void Confirm()
         {
@@ -120,30 +127,61 @@ namespace PullableXR
             if (hasBeenConfirmed) return;
             hasBeenConfirmed = true;
 
+            // Ensure the scale is set to max
             instanceTransform.localScale = Vector3.one * maxScale;
             
             if (_rb) 
             {
                 _rb.isKinematic = false;
             }
-            //RestoreOriginalLayers();
 
-            XRDebugLogViewer.Log($"Pullable: Confirm - Scale set to {instanceTransform.localScale}");
+            //RestoreOriginalLayers();
+            
+            // Notify all behaviors (Observer pattern)
+            foreach (var behavior in _behaviors)
+            {
+                try
+                {
+                    behavior.OnPullConfirmed(this);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[{nameof(PullableInstance)}] Error in pullable behavior {behavior.GetType().Name} during OnPullConfirmed: {e.Message}\nStack Trace: {e.StackTrace}");
+                    throw; // Re-throw to maintain error context
+                }
+            }
+
             spawner.HandleConfirm();
+            
+            XRDebugLogViewer.Log($"Pullable: Confirm - Scale set to {instanceTransform.localScale}");
         }
 
         /// <summary>
         /// Cancels the pull with animation and destroys the instance.
+        /// Notifies all registered behaviors of the cancellation.
         /// </summary>
         private void Cancel()
         {
+            // Notify all behaviors before cancellation (Observer pattern)
+            foreach (var behavior in _behaviors)
+            {
+                try
+                {
+                    behavior.OnPullCancelled(this);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"[{nameof(PullableInstance)}] Error in pullable behavior {behavior.GetType().Name} during OnPullCancelled: {e.Message}\nStack Trace: {e.StackTrace}");
+                    throw; // Re-throw to maintain error context
+                }
+            }
+
             Sequence cancelSeq = DOTween.Sequence();
             cancelSeq.Join(instanceTransform.DOMove(spawner.transform.position, failedDuration).SetEase(failedEase));
             cancelSeq.Join(instanceTransform.DOScale(Vector3.one * minScale, failedDuration).SetEase(failedEase));
             cancelSeq.OnComplete(() => Destroy(gameObject));
 
             XRDebugLogViewer.Log($"Pullable: Cancel");
-
 
             spawner.HandleCancel();
         }
@@ -200,6 +238,5 @@ namespace PullableXR
             _eventWrapper.WhenSelect.RemoveListener(() => { });
             _eventWrapper.WhenUnselect.RemoveListener(() => { });
         }
-
     }
 }
