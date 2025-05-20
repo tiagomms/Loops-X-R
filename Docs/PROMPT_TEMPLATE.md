@@ -107,6 +107,15 @@
   - Use double quotes (`"`)
   - Use string templates or `.join()`
   - No operational concatenation
+- Game Design Patterns:
+  - Solutions should follow industry standard game dev design patterns
+  - Each pattern choice must be justified with a brief explanation
+  - Common patterns include:
+    a. Observer Pattern: For event-driven systems and decoupled communication
+    b. Strategy Pattern: For interchangeable behaviors and algorithms
+    c. Factory Pattern: For object creation and instantiation
+    d. Command Pattern: For action encapsulation and undo/redo systems
+    e. Component Pattern: For flexible and reusable game object behaviors
 - Enum standards:
   - Always use explicit integer values for enum members
   - Order enum members logically

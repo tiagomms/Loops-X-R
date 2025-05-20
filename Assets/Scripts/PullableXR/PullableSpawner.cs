@@ -62,7 +62,6 @@ namespace PullableXR
         public UnityEvent onCancel;
 
         private readonly Dictionary<HandPinchDetector, PullableInstance> _activeInstances = new Dictionary<HandPinchDetector, PullableInstance>();
-        private readonly HashSet<HandPinchDetector> _processedPinchDetectors = new HashSet<HandPinchDetector>();
         #endregion
 
         #region Public Methods
@@ -130,14 +129,13 @@ namespace PullableXR
                 try
                 {
                     instance.Release();
-                    _activeInstances.Remove(pullingPinch);
-                    _processedPinchDetectors.Remove(pullingPinch);
-                    ClearPinchDetectorCallbacks(pullingPinch);
-
                     if (logPullEvents)
                     {
                         XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] Release from {pullingPinch.gameObject.name}. Remaining pulls: {_activeInstances.Count}/{maxSimultaneousPulls}");
                     }
+
+                    ClearPinchDetectorCallbacks(pullingPinch);
+                    _activeInstances.Remove(pullingPinch);
                 }
                 catch (System.Exception e)
                 {
@@ -152,6 +150,7 @@ namespace PullableXR
         public void HandleConfirm()
         {
             onConfirm?.Invoke();
+
         }
 
         /// <summary>
@@ -171,7 +170,7 @@ namespace PullableXR
         {
             pinchDetector = other.GetComponentInParent<HandPinchDetector>();
             if (pinchDetector == null ||
-                _processedPinchDetectors.Contains(pinchDetector) ||
+                _activeInstances.ContainsKey(pinchDetector) ||
                 pinchDetector.WasPinching)
             {
                 return false;
@@ -183,8 +182,6 @@ namespace PullableXR
         private void OnTriggerEnter(Collider other)
         {
             if (!ShouldProcessTrigger(other, out var pinchDetector)) return;
-
-            _processedPinchDetectors.Add(pinchDetector);
 
             HandGrabInteractor interactor = pinchDetector.GetComponentInChildren<HandGrabInteractor>();
             if (interactor != null)
@@ -205,7 +202,6 @@ namespace PullableXR
         {
             if (!ShouldProcessTrigger(other, out var pinchDetector)) return;
 
-            _processedPinchDetectors.Remove(pinchDetector);
             ClearPinchDetectorCallbacks(pinchDetector);
             
             if (logPullEvents)
