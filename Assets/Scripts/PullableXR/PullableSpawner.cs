@@ -3,79 +3,146 @@ using UnityEngine.Events;
 using DG.Tweening;
 using Oculus.Interaction.Input;
 using Oculus.Interaction.HandGrab;
+using Unity.VisualScripting;
+using System.Collections.Generic;
 
 namespace PullableXR
 {
     /// <summary>
-    /// Responsible for spawning pullable instances when a pinch is detected near the spawner.
-    /// The spawner itself is static and does not move. Tracks and manages active pullable instance.
+    /// Manages the spawning and tracking of pullable instances in response to pinch gestures.
+    /// Supports multiple simultaneous pulls from different pinch detectors.
     /// </summary>
     public class PullableSpawner : MonoBehaviour
     {
+        #region Fields
+        [Header("Collider")]
+        [SerializeField, Tooltip("Trigger collider for detecting pinch interactions")]
+        private Collider triggerCollider;
+
         [Header("Prefab Settings")]
-        [SerializeField] private GameObject pullablePrefab;
-        [SerializeField] private Vector3 spawnOffset = new Vector3(0, 0.1f, 0);
+        [SerializeField, Tooltip("Prefab to instantiate when pulling")]
+        private GameObject pullablePrefab;
+        
+        [SerializeField, Tooltip("Offset from spawner position for new instances")]
+        private Vector3 spawnOffset = new Vector3(0, 0.1f, 0);
 
         [Header("Distance Settings")]
-        [SerializeField] private float confirmDistance = 0.3f;
-        [SerializeField] private float failedReleaseDuration = 0.3f;
-        [SerializeField] private Ease failedReleaseEase = Ease.OutSine;
+        [SerializeField, Tooltip("Distance required to confirm a successful pull")]
+        private float confirmDistance = 0.3f;
+        
+        [SerializeField, Tooltip("Duration of the failed release animation")]
+        private float failedReleaseDuration = 0.3f;
+        
+        [SerializeField, Tooltip("Easing function for failed release animation")]
+        private Ease failedReleaseEase = Ease.OutSine;
 
         [Header("Scale Settings")]
-        [SerializeField] private float minScale = 0.2f;
-        [SerializeField] private float maxScale = 1f;
+        [SerializeField, Tooltip("Minimum scale for pullable instances")]
+        private float minScale = 0.2f;
+        
+        [SerializeField, Tooltip("Maximum scale for pullable instances")]
+        private float maxScale = 1f;
 
         [Header("Layer Settings")]
-        [SerializeField] private string temporaryLayerName = "Uninteractive";
+        [SerializeField, Tooltip("Layer name for temporary uninteractive state")]
+        private string temporaryLayerName = "Uninteractive";
+
+        [Header("Pull Settings")]
+        [SerializeField, Tooltip("Maximum number of simultaneous pulls allowed")]
+        private int maxSimultaneousPulls = 2;
+        
+        [SerializeField, Tooltip("Enable detailed logging of pull events")]
+        private bool logPullEvents = true;
 
         [Header("Events")]
+        [Tooltip("Invoked when a pull is successfully confirmed")]
         public UnityEvent onConfirm;
+        
+        [Tooltip("Invoked when a pull is cancelled")]
         public UnityEvent onCancel;
 
-        private PullableInstance activeInstance;
+        private readonly Dictionary<HandPinchDetector, PullableInstance> _activeInstances = new Dictionary<HandPinchDetector, PullableInstance>();
+        private readonly HashSet<HandPinchDetector> _processedPinchDetectors = new HashSet<HandPinchDetector>();
+        #endregion
 
+        #region Public Methods
         /// <summary>
         /// Called when a pinch gesture is detected inside this spawner's trigger collider.
-        /// Instantiates and initializes a new pullable instance.
+        /// Instantiates and initializes a new pullable instance for the specific pinch detector.
         /// </summary>
-        public void TriggerPull(Transform handTransform, HandGrabInteractor interactor)
+        public void TriggerPull(Transform handTransform, HandGrabInteractor interactor, HandPinchDetector pullingPinch)
         {
-            if (activeInstance != null) return;
+            if (_activeInstances.Count >= maxSimultaneousPulls)
+            {
+                if (logPullEvents)
+                {
+                    XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] Maximum simultaneous pulls ({maxSimultaneousPulls}) reached. Ignoring pull from {pullingPinch.gameObject.name}");
+                }
+                return;
+            }
 
-            GameObject spawned = Instantiate(pullablePrefab);
-            Transform spawnedT = spawned.transform;
+            if (_activeInstances.ContainsKey(pullingPinch)) return;
 
-            Vector3 spawnPos = transform.position + spawnOffset;
-            spawnedT.position = spawnPos;
-            spawnedT.LookAt(Camera.main.transform);
-            spawnedT.localScale = Vector3.one * minScale;
+            try
+            {
+                GameObject spawned = Instantiate(pullablePrefab);
+                Transform spawnedT = spawned.transform;
 
-            // Attach the PullableInstance logic and initialize behavior.
-            activeInstance = spawned.AddComponent<PullableInstance>();
-            activeInstance.Initialize(
-                spawner: this,
-                instanceT: spawnedT,
-                initialPos: spawnPos,
-                handT: handTransform,
-                interactor: interactor,
-                confirmDistance: confirmDistance,
-                minScale: minScale,
-                maxScale: maxScale,
-                failedDuration: failedReleaseDuration,
-                failedEase: failedReleaseEase,
-                temporaryLayerName: temporaryLayerName
-            );
+                Vector3 spawnPos = transform.position + spawnOffset;
+                spawnedT.position = spawnPos;
+                spawnedT.LookAt(Camera.main.transform);
+                spawnedT.localScale = Vector3.one * minScale;
+
+                var instance = spawned.AddComponent<PullableInstance>();
+                instance.Initialize(
+                    spawner: this,
+                    instanceT: spawnedT,
+                    initialPos: transform.position,
+                    handT: handTransform,
+                    interactor: interactor,
+                    confirmDistance: confirmDistance,
+                    minScale: minScale,
+                    maxScale: maxScale,
+                    failedDuration: failedReleaseDuration,
+                    failedEase: failedReleaseEase,
+                    temporaryLayerName: temporaryLayerName
+                );
+
+                _activeInstances[pullingPinch] = instance;
+                if (logPullEvents)
+                {
+                    XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] Trigger Pull instance from {pullingPinch.gameObject.name}. Active pulls: {_activeInstances.Count}/{maxSimultaneousPulls}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[{nameof(PullableSpawner)}] Error creating pullable instance: {e.Message}");
+            }
         }
 
         /// <summary>
         /// Called externally by the active PullableInstance when the user releases their pinch.
         /// </summary>
-        public void Release()
+        public void Release(HandPinchDetector pullingPinch)
         {
-            if (activeInstance != null)
+            if (_activeInstances.TryGetValue(pullingPinch, out var instance))
             {
-                activeInstance.Release();
-                activeInstance = null;
+                try
+                {
+                    instance.Release();
+                    _activeInstances.Remove(pullingPinch);
+                    _processedPinchDetectors.Remove(pullingPinch);
+                    ClearPinchDetectorCallbacks(pullingPinch);
+
+                    if (logPullEvents)
+                    {
+                        XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] Release from {pullingPinch.gameObject.name}. Remaining pulls: {_activeInstances.Count}/{maxSimultaneousPulls}");
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"[{nameof(PullableSpawner)}] Error releasing pullable instance: {e.Message}");
+                }
             }
         }
 
@@ -94,46 +161,66 @@ namespace PullableXR
         {
             onCancel?.Invoke();
         }
+        #endregion
 
+        #region Private Methods
         /// <summary>
-        /// When a collider enters the trigger, try to detect the Hand and register pinch callbacks.
+        /// Checks if the collider is a valid pinch collider that should be processed.
         /// </summary>
+        private bool ShouldProcessTrigger(Collider other, out HandPinchDetector pinchDetector)
+        {
+            pinchDetector = other.GetComponentInParent<HandPinchDetector>();
+            if (pinchDetector == null ||
+                _processedPinchDetectors.Contains(pinchDetector) ||
+                pinchDetector.WasPinching)
+            {
+                return false;
+            }
+
+            return pinchDetector.PinchCollider == other;
+        }
+
         private void OnTriggerEnter(Collider other)
         {
-            Hand hand = other.GetComponentInParent<Hand>();
-            if (hand != null)
-            {
-                HandPinchDetector pinchDetector = hand.GetComponent<HandPinchDetector>();
-                if (pinchDetector == null)
-                {
-                    pinchDetector = hand.gameObject.AddComponent<HandPinchDetector>();
-                }
+            if (!ShouldProcessTrigger(other, out var pinchDetector)) return;
 
-                HandGrabInteractor interactor = hand.GetComponentInChildren<HandGrabInteractor>();
-                if (interactor != null)
+            _processedPinchDetectors.Add(pinchDetector);
+
+            HandGrabInteractor interactor = pinchDetector.GetComponentInChildren<HandGrabInteractor>();
+            if (interactor != null)
+            {
+                pinchDetector.SetCallbacks(
+                    onPinch: () => TriggerPull(pinchDetector.PinchEndTransform, interactor, pinchDetector),
+                    onRelease: () => Release(pinchDetector)
+                );
+
+                if (logPullEvents)
                 {
-                    pinchDetector.SetCallbacks(
-                        onPinch: () => TriggerPull(hand.transform, interactor),
-                        onRelease: () => Release()
-                    );
+                    XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] On Trigger Enter - {interactor.gameObject.name} set pinch callbacks");
                 }
             }
         }
 
-        /// <summary>
-        /// Unregister pinch callbacks when the hand exits the trigger collider.
-        /// </summary>
         private void OnTriggerExit(Collider other)
         {
-            Hand hand = other.GetComponentInParent<Hand>();
-            if (hand != null)
+            if (!ShouldProcessTrigger(other, out var pinchDetector)) return;
+
+            _processedPinchDetectors.Remove(pinchDetector);
+            ClearPinchDetectorCallbacks(pinchDetector);
+            
+            if (logPullEvents)
             {
-                HandPinchDetector pinchDetector = hand.GetComponent<HandPinchDetector>();
-                if (pinchDetector != null)
-                {
-                    pinchDetector.ClearCallbacks();
-                }
+                XRDebugLogViewer.Log($"[{nameof(PullableSpawner)}] On Trigger Exit - {pinchDetector.gameObject.name} cleared callbacks");
             }
         }
+
+        private void ClearPinchDetectorCallbacks(HandPinchDetector pinchDetector)
+        {
+            if (pinchDetector != null)
+            {
+                pinchDetector.ClearCallbacks();
+            }
+        }
+        #endregion
     }
 }

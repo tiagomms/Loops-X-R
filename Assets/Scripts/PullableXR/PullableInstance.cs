@@ -27,10 +27,18 @@ namespace PullableXR
         private string temporaryLayerName;
         private bool hasBeenConfirmed = false;
 
+        private Rigidbody _rb;
+
         private InteractableUnityEventWrapper _eventWrapper;
+        private HandGrabInteractable _interactable;
+
 
         private void Start()
         {
+            _rb = GetComponentInParent<Rigidbody>();
+
+            _interactable = GetComponentInChildren<HandGrabInteractable>();
+            
             AttachToHand();
         }
 
@@ -103,9 +111,12 @@ namespace PullableXR
             if (hasBeenConfirmed) return;
             hasBeenConfirmed = true;
             instanceTransform.localScale = Vector3.one * maxScale;
-
+            
+            if (_rb) _rb.isKinematic = false;
             //RestoreOriginalLayers();
             spawner.HandleConfirm();
+            
+            XRDebugLogViewer.Log($"Pullable: Confirm");
 
             enabled = false;
         }
@@ -120,6 +131,9 @@ namespace PullableXR
             cancelSeq.Join(instanceTransform.DOScale(Vector3.one * minScale, failedDuration).SetEase(failedEase));
             cancelSeq.OnComplete(() => Destroy(gameObject));
 
+            XRDebugLogViewer.Log($"Pullable: Cancel");
+
+
             spawner.HandleCancel();
         }
 
@@ -128,12 +142,7 @@ namespace PullableXR
         /// </summary>
         private void AttachToHand()
         {
-            var handGrabInteractable = GetComponentInChildren<HandGrabInteractable>();
-            if (handGrabInteractable == null)
-            {
-                Debug.LogWarning($"Can't attach to hand pullable instance, no hand grab interactable in prefab");
-                return;
-            }
+            
 
             /*
             if (TryGetComponent(out _eventWrapper))
@@ -144,8 +153,24 @@ namespace PullableXR
             }
             */
 
-            interactor.ForceSelect(handGrabInteractable);
+            if (!_interactable)
+            {
+                XRDebugLogViewer.LogWarning($"Pullable: Attach to Hand - Can't attach to hand - no hand interactable in object");
+                return;
+            }
+            if (_rb) _rb.isKinematic = true;
+
+            // true to allow normal release
+            interactor.ForceSelect(_interactable, true);
+            XRDebugLogViewer.Log($"Pullable: Attach to Hand - {interactor.gameObject.name} selects {_interactable.gameObject.name} - Rigidbody kinematic {_rb.isKinematic}");
         }
+
+        /*
+        private void DetachFromHand()
+        {
+            interactor.ForceRelease();
+        }
+        */
 
         /// <summary>
         /// Stores all original layers and replaces them with a temporary uninteractive one.
