@@ -7,36 +7,39 @@ namespace PullableXR
     /// Behavior that updates a joint's position when a pullable is confirmed or cancelled.
     /// This behavior should be attached to the prefab that contains the joint.
     /// </summary>
-    public class JointUpdatePullableBehavior : PullableBehavior
+    public class AudioOrbPullableBehavior : PullableBehavior
     {
         [Header("Joint Settings")]
-        [SerializeField, Tooltip("The joint to update. If null, will try to find a joint on this GameObject")]
+        [SerializeField, Tooltip("The joint to update. If null, throws error.")]
         private Joint targetJoint;
+
+        [SerializeField, Tooltip("The Rigidbody to update. If null, If null, throws error.")]
+        private Rigidbody rigidbody;
+
 
         protected override void OnInitialize()
         {
-            // If no joint is assigned, try to find one on this GameObject
-            if (targetJoint == null)
+            if (targetJoint == null || rigidbody == null)
             {
-                targetJoint = GetComponent<Joint>();
-            }
-
-            if (targetJoint == null)
-            {
-                Debug.LogError($"[{nameof(JointUpdatePullableBehavior)}] No Joint found on {gameObject.name}. Please assign a joint or ensure this component is on the same GameObject as the joint.");
+                Debug.LogError($"[{nameof(AudioOrbPullableBehavior)}] No Joint and/or Rigidbody found on {gameObject.name}. Please assign a joint and rigidbody.");
                 enabled = false;
                 return;
             }
+            rigidbody.isKinematic = true; // force to kinematic
         }
 
         public override void OnPullConfirmed(PullableInstance instance)
         {
+            /*
             UpdateJointTransform();
+            rigidbody.isKinematic = false; // force to not be kinematic
+            */
+            XRDebugLogViewer.Log($"[{nameof(AudioOrbPullableBehavior)}] Pull confirmed");
         }
 
         public override void OnPullCancelled(PullableInstance instance)
         {
-            UpdateJointTransform();
+            //UpdateJointTransform();
         }
 
         private void UpdateJointTransform()
@@ -44,9 +47,12 @@ namespace PullableXR
             if (targetJoint == null) return;
 
             // Update joint's connected anchor to maintain the same relative position
+            /*
             Vector3 localPosition = targetJoint.transform.InverseTransformPoint(targetJoint.transform.position);
             targetJoint.connectedAnchor = localPosition;
-
+            */
+            //targetJoint.connectedAnchor = rigidbody.transform.position;
+            /*
             // Update joint's connected anchor rotation to maintain the same relative rotation
             Quaternion localRotation = Quaternion.Inverse(targetJoint.transform.rotation) * targetJoint.transform.rotation;
             
@@ -55,6 +61,7 @@ namespace PullableXR
             {
                 configJoint.targetRotation = localRotation;
             }
+            */
         }
     }
 } 

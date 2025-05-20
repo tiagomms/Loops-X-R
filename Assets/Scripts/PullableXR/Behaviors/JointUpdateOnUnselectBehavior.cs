@@ -1,18 +1,22 @@
 using UnityEngine;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
+using UnityEditorInternal;
 
 namespace PullableXR
 {
     /// <summary>
     /// Behavior that updates a joint's position when an interactable is unselected.
-    /// This behavior should be attached to the prefab that has the joint.
+    /// This behavior should be attached to the prefab that has the joint. 
     /// </summary>
     public class JointUpdateOnUnselectBehavior : MonoBehaviour
     {
+        // FIXME: JointUpdateOnUnselectBehavior and AudioOrbPullableBehavior are both trying to do the same thing with no success
+        // FIXME: isKinematic is not resetting to false and configurable joint connectedAnchor moves to 0.  
         [Header("Joint Settings")]
         [SerializeField, Tooltip("The joint to update")]
         private Joint targetJoint;
+        private Rigidbody rigidbody;
 
         private InteractableUnityEventWrapper _eventWrapper;
 
@@ -30,6 +34,7 @@ namespace PullableXR
                 return;
             }
 
+            rigidbody = targetJoint.GetComponent<Rigidbody>();
             _eventWrapper = GetComponent<InteractableUnityEventWrapper>();
             if (_eventWrapper == null)
             {
@@ -38,6 +43,7 @@ namespace PullableXR
                 return;
             }
             // Subscribe to unselect event
+            _eventWrapper.WhenSelect.AddListener(OnSelected);
             _eventWrapper.WhenUnselect.AddListener(OnUnselected);
         }
 
@@ -45,8 +51,18 @@ namespace PullableXR
         {
             if (_eventWrapper != null)
             {
+                _eventWrapper.WhenSelect.RemoveListener(OnSelected);
                 _eventWrapper.WhenUnselect.RemoveListener(OnUnselected);
             }
+        }
+
+        private void OnSelected()
+        {
+            rigidbody.isKinematic = true;
+            targetJoint.autoConfigureConnectedAnchor = false;
+
+            XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] On Select");
+
         }
 
         /// <summary>
@@ -55,6 +71,8 @@ namespace PullableXR
         private void OnUnselected()
         {
             UpdateJointTransform();
+            rigidbody.isKinematic = false;
+
             XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] Joint updated on unselect");
         }
 
@@ -66,9 +84,10 @@ namespace PullableXR
             if (targetJoint == null) return;
 
             // Update joint's connected anchor to maintain the same relative position
-            Vector3 localPosition = transform.InverseTransformPoint(targetJoint.transform.position);
-            targetJoint.connectedAnchor = localPosition;
+            //Vector3 localPosition = transform.InverseTransformPoint(targetJoint.transform.position);
+            //targetJoint.connectedAnchor = targetJoint.transform.position;
 
+            /*
             // Update joint's connected anchor rotation to maintain the same relative rotation
             Quaternion localRotation = Quaternion.Inverse(transform.rotation) * targetJoint.transform.rotation;
             
@@ -77,8 +96,9 @@ namespace PullableXR
             {
                 configJoint.targetRotation = localRotation;
             }
+            */
 
-            XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] Joint transform updated - Position: {localPosition}, Rotation: {localRotation}");
+            //XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] Joint transform updated");// - Position: {localPosition}, Rotation: {localRotation}");
         }
     }
 } 
