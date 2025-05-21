@@ -9,16 +9,57 @@ using UnityEngine;
 public class RecordAudioInterface : MonoBehaviour
 {
     public AudioSource audioSource;
-    //TODO: In factory, assign micController, wavFileManager, interfaceName
-    public MicController micController; 
-    public WavFileManager wavFileManager;
+    //TODO: In factory, assign micController, wavFileManager, interfaceName (later)
+    private MicController micController; 
+    private WavFileManager wavFileManager;
+    private ControlsManager controlsManager;
     public string interfaceName = "A";
 
     // TODO: expand Interface to hold multiple AudioClips and track which one on.
     
     private int takeNbr = 0;
     private float _lastVolume = 1f;
+    private bool isRecording = false;
 
+    private void Start()
+    {
+        micController = MicController.Instance;
+        wavFileManager = WavFileManager.Instance;
+        
+        if (micController == null || wavFileManager == null)
+        {
+            Debug.LogError("MicController or WavFileManager singleton not found in scene");
+            return;
+        }
+
+        controlsManager = ControlsManager.Instance;
+        if (controlsManager)
+        {
+            controlsManager.Microgestures.OnTap.AddListener(ToggleRecording);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (controlsManager)
+        {
+            controlsManager.Microgestures.OnTap.RemoveListener(ToggleRecording);
+        }
+    }
+
+    private void ToggleRecording()
+    {
+        isRecording = !isRecording;
+        if (isRecording)
+        {
+            StartRecording();
+        }
+        else
+        {
+            StopRecording();
+        }
+        XRDebugLogViewer.Log($"{gameObject.name} Is Recording: {isRecording}");
+    }
 
     public void StartRecording()
     {
@@ -37,7 +78,6 @@ public class RecordAudioInterface : MonoBehaviour
     public void PlayAudioClip()
     {
         StopAudioClip();
-
         audioSource.Play();
     }
 
@@ -93,5 +133,4 @@ public class RecordAudioInterface : MonoBehaviour
         StopAudioClip();
         audioSource.clip = recordedClip;
     }
-
 }

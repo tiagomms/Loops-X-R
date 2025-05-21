@@ -635,6 +635,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 784876944}
+  interfaceName: A
 --- !u!1 &81462114
 GameObject:
   m_ObjectHideFlags: 0
@@ -4048,6 +4049,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   audioSource: {fileID: 753982600}
+  interfaceName: A
 --- !u!4 &808157599
 Transform:
   m_ObjectHideFlags: 0
@@ -4988,6 +4990,91 @@ RectTransform:
   m_AnchoredPosition: {x: -0.0000076293945, y: 217.00003}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
+--- !u!1 &1094443311
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1094443313}
+  - component: {fileID: 1094443312}
+  m_Layer: 0
+  m_Name: GlobalEventManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1094443312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1094443311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c54fea9a60f9e3408fb87406141288b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _currentState: 1
+  _previousState: 1
+  OnStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRecordingStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnRecordingStopped:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSpawningStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSpawningStopped:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSelectStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnSelectStopped:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEditStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEditStopped:
+    m_PersistentCalls:
+      m_Calls: []
+  OnMoveStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnMoveStopped:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnPlayStopped:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &1094443313
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1094443311}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.08284167, y: 1.7053152, z: -0.94301534}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1151616435
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8902,3 +8989,4 @@ SceneRoots:
   - {fileID: 410087041}
   - {fileID: 832575519}
   - {fileID: 921567814}
+  - {fileID: 1094443313}

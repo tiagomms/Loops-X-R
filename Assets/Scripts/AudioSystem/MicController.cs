@@ -4,6 +4,8 @@ namespace AudioSystem
 {
     public class MicController : MonoBehaviour
     {
+        public static MicController Instance { get; private set; }
+
         private float _recordingLength;
         private AudioClip _recordedClip;
         private float _startTime;
@@ -18,6 +20,14 @@ namespace AudioSystem
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            
+            Instance = this;
+
             for (int i = 0; i < Microphone.devices.Length; i++)
             {
                 Debug.Log($"Device name {i}: {Microphone.devices[i]}");
@@ -27,7 +37,6 @@ namespace AudioSystem
             _micIndex = micDeviceIndex; // NOTE: whatever you set on debug, usually is 0 (for deployment)
             #endif
         }
-
 
         public void WorkStart()
         {
@@ -42,8 +51,6 @@ namespace AudioSystem
 
             _recordedClip = Microphone.Start(device, true, lengthSec, sampleRate);
             _startTime = Time.realtimeSinceStartup;
-
-
 #endif
         }
 
@@ -58,6 +65,7 @@ namespace AudioSystem
             _recordedClip = TrimClip(_recordedClip, _recordingLength);
             return _recordedClip;
 #endif
+            return null;
         }
 
         private AudioClip TrimClip(AudioClip clip, float length)
@@ -98,6 +106,5 @@ namespace AudioSystem
 
             return trimmedClip;
         }
-
     }
 }

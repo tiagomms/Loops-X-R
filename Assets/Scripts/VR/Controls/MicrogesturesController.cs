@@ -8,8 +8,6 @@ namespace VR.Controls
 {
     public class MicrogesturesController : MonoBehaviour
     {
-        [SerializeField]
-        private ControlsManager controlsManager;
 
         [SerializeField]
         private OVRMicrogestureEventSource leftGestureSource;

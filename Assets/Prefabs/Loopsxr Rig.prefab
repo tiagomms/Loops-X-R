@@ -13111,7 +13111,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 04e6c54cfddd4c5468632471d4fc8531, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controlsManager: {fileID: 0}
   leftGestureSource: {fileID: 832095836868361738}
   rightGestureSource: {fileID: 576654533991168892}
   validOnTapStates: -1
@@ -34931,7 +34930,6 @@ GameObject:
   m_Component:
   - component: {fileID: 814490511588216384}
   - component: {fileID: 7917319739132098734}
-  - component: {fileID: 447415142910624123}
   m_Layer: 0
   m_Name: Controls
   m_TagString: Untagged
@@ -34967,59 +34965,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2024659ec9e8d7e4e8dca1cc57fef97e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &447415142910624123
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7175310267620878184}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c54fea9a60f9e3408fb87406141288b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _currentState: 1
-  _previousState: 1
-  OnStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  OnRecordingStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnRecordingStopped:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSpawningStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSpawningStopped:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSelectStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSelectStopped:
-    m_PersistentCalls:
-      m_Calls: []
-  OnEditStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnEditStopped:
-    m_PersistentCalls:
-      m_Calls: []
-  OnMoveStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnMoveStopped:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPlayStarted:
-    m_PersistentCalls:
-      m_Calls: []
-  OnPlayStopped:
-    m_PersistentCalls:
-      m_Calls: []
+  microgestures: {fileID: 5060795809887644403}
 --- !u!1 &7183694205288436454
 GameObject:
   m_ObjectHideFlags: 0
