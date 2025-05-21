@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 5143820273989300806}
   - component: {fileID: 8749827756388647295}
   - component: {fileID: 3674243328614603596}
+  - component: {fileID: 7818217513808807022}
   m_Layer: 0
   m_Name: AudioOrb
   m_TagString: Untagged
@@ -301,6 +302,18 @@ ConfigurableJoint:
   m_EnablePreprocessing: 1
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &7818217513808807022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3084155293571431554}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0814deac4fc8744aa3254f6aa92d172, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6524985312519729079
 GameObject:
   m_ObjectHideFlags: 0
