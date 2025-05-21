@@ -25819,6 +25819,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AudioOrb (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 3674243328614603596, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
+      propertyPath: m_AutoConfigureConnectedAnchor
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5143820273989300806, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
