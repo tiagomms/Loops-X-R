@@ -52,6 +52,22 @@
     c. Correct all issues
     d. Continue with proper formatting
 
+- Magic Phrase for Game Dev Standards:
+  - Simply state: "Please follow game dev standards."
+  - This will make AI:
+    a. Review and apply industry standard game dev patterns
+    b. Justify pattern choices with brief explanations
+    c. Consider Unity-specific best practices
+    d. Ensure solutions are production-ready
+
+- Magic Phrase for Code State Preservation:
+  - Simply state: "Please preserve code state."
+  - This will make AI:
+    a. Never modify commented code without explicit request
+    b. Never remove unused methods without explicit request
+    c. Respect existing code structure and organization
+    d. Ask for clarification before making structural changes
+
 - Specific Issues and Corrections:
   1. Enumeration Mistakes
      a. Use: "Please follow the enumeration rules from PROMPT_TEMPLATE.md"
@@ -81,6 +97,14 @@
         iii. Assembly references
         iv. Dependency management
 
+  5. Code State Preservation
+     a. Use: "Please preserve code state"
+     b. AI will:
+        i. Never modify commented code without explicit request
+        ii. Never remove unused methods without explicit request
+        iii. Respect existing code structure
+        iv. Ask before making structural changes
+
 - Best Practices for Error Correction:
   1. Start with the magic phrase for general issues
   2. Use specific phrases for targeted fixes
@@ -103,10 +127,71 @@
 - Comprehensive inline comments
 - Error checking and type validation
 - Strict TypeScript notation (when applicable)
+- Code Readability Standards:
+  - Prefer abstract classes over interfaces when:
+    a. The implementation is closely related
+    b. There's shared functionality
+    c. The behavior is specific to the domain
+    d. You want to provide default implementations
+  - Use interfaces when:
+    a. Multiple inheritance is needed
+    b. The contract is very generic
+    c. The implementation is completely different
+    d. You want to define a pure contract
+  - Code organization guidelines:
+    1. Group related functionality
+    2. Use clear, descriptive names
+    3. Keep methods focused and small
+    4. Use consistent patterns
+    5. Document design decisions
+  - Common patterns to consider:
+    a. Abstract base classes for shared behavior
+    b. Interface segregation for specific contracts
+    c. Template method pattern for algorithm structure
+    d. Strategy pattern for interchangeable behaviors
+  - Documentation requirements:
+    1. Explain why a pattern was chosen
+    2. Document any deviations from standards
+    3. Provide usage examples
+    4. Include design considerations
 - String standards:
   - Use double quotes (`"`)
   - Use string templates or `.join()`
   - No operational concatenation
+- Error Handling Standards:
+  - Always include stack traces in error logs
+  - Re-throw exceptions to maintain error context
+  - Use specific exception types when possible
+  - Include component/object names in error messages
+  - Log errors at the point of occurrence
+  - Avoid catching and swallowing exceptions
+  - Use try-catch blocks only when necessary
+  - Document expected exceptions in XML comments
+  - Follow this error message format:
+    ```csharp
+    Debug.LogError($"[{nameof(ClassName)}] Error in {methodName} for {objectName}: {e.Message}\nStack Trace: {e.StackTrace}");
+    ```
+  - Error handling hierarchy:
+    1. Log the error with full context
+    2. Re-throw to maintain stack trace
+    3. Let higher-level handlers decide recovery
+    4. Document error handling in XML comments
+- Game Design Patterns:
+  - Solutions should follow industry standard game dev patterns
+  - Each pattern choice must be justified with a brief explanation
+  - Common patterns include:
+    a. Observer Pattern: For event-driven systems and decoupled communication
+    b. Strategy Pattern: For interchangeable behaviors and algorithms
+    c. Factory Pattern: For object creation and instantiation
+    d. Command Pattern: For action encapsulation and undo/redo systems
+    e. Component Pattern: For flexible and reusable game object behaviors
+- Code State Preservation:
+  - Never modify commented code without explicit request
+  - Never remove unused methods without explicit request
+  - Respect existing code structure and organization
+  - Ask for clarification before making structural changes
+  - Preserve debugging code and commented sections
+  - Maintain existing code organization
 - Enum standards:
   - Always use explicit integer values for enum members
   - Order enum members logically
@@ -204,4 +289,108 @@ Project Root/
 - This is a living document
 - Update as project evolves
 - Add new guidelines as needed
-- Document special considerations 
+- Document special considerations
+
+### AI Response Protocol
+- Systematic Approach:
+  1. Pre-Response Checklist
+     a. Review entire PROMPT_TEMPLATE.md
+     b. Check for relevant magic phrases
+     c. Verify code state preservation rules
+     d. Ensure proper enumeration
+     e. Validate against all standards
+     f. Identify any potential conflicts between template sections
+     g. Ask for clarification if conflicts exist
+
+  2. Response Structure
+     a. Acknowledge the request
+     b. State relevant template sections
+     c. Follow enumeration rules
+     d. Include proper documentation
+     e. Preserve code state
+     f. Highlight any template conflicts
+     g. Request guidance on conflict resolution
+
+  3. Code Changes Protocol
+     a. Review existing code state
+     b. Note all commented sections
+     c. Identify unused methods
+     d. Ask for clarification if needed
+     e. Propose changes before implementing
+     f. Verify changes against template
+     g. Request confirmation for any template deviations
+
+- Response Format:
+  1. Initial Response
+     a. Acknowledge request
+     b. List relevant template sections
+     c. State intended approach
+     d. Ask for confirmation if needed
+     e. Highlight any template conflicts
+     f. Request guidance on conflict resolution
+
+  2. Code Changes
+     a. Show proposed changes
+     b. Explain reasoning
+     c. Wait for approval
+     d. Implement only after confirmation
+     e. Verify against template
+     f. Request guidance for any deviations
+
+  3. Follow-up
+     a. Verify changes
+     b. Check for side effects
+     c. Confirm completion
+     d. Ask for next steps
+     e. Ensure template compliance
+     f. Request feedback on template adherence
+
+- Quality Assurance:
+  1. Code Review
+     a. Check against standards
+     b. Verify documentation
+     c. Ensure type safety
+     d. Validate string formatting
+     e. Verify template compliance
+     f. Request guidance for any deviations
+
+  2. State Preservation
+     a. Verify commented code
+     b. Check unused methods
+     c. Validate structure
+     d. Confirm organization
+     e. Ensure template compliance
+     f. Request guidance for any deviations
+
+  3. Documentation
+     a. XML comments
+     b. Inline comments
+     c. Method documentation
+     d. Class documentation
+     e. Template compliance notes
+     f. Conflict resolution requests
+
+- Template Adherence:
+  1. Mandatory Compliance
+     a. All responses must follow template
+     b. No deviations without explicit approval
+     c. All conflicts must be reported
+     d. All deviations must be justified
+     e. All changes must be confirmed
+
+  2. Conflict Resolution
+     a. Identify conflicting template sections
+     b. Explain the conflict clearly
+     c. Propose possible resolutions
+     d. Wait for user guidance
+     e. Implement only after approval
+
+  3. Deviation Handling
+     a. Document any necessary deviations
+     b. Explain deviation reasoning
+     c. Request explicit approval
+     d. Implement only after confirmation
+     e. Document the approved deviation
+
+### Error Correction
+// ... rest of existing content ... 

@@ -1,7 +1,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace Utilities
+namespace Utils
 {
     public static class FileUtility
     {
