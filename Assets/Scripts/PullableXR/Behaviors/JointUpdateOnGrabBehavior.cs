@@ -9,10 +9,9 @@ namespace PullableXR
     /// Behavior that updates a joint's position when an interactable is unselected.
     /// This behavior should be attached to the prefab that has the joint. 
     /// </summary>
-    public class JointUpdateOnUnselectBehavior : MonoBehaviour
+    public class JointUpdateOnGrabBehavior : MonoBehaviour
     {
-        // FIXME: JointUpdateOnUnselectBehavior and AudioOrbPullableBehavior are both trying to do the same thing with no success
-        // FIXME: isKinematic is not resetting to false and configurable joint connectedAnchor moves to 0.  
+        // NOTE: never use is kinematic on grabbable objects, if you want to have control over the joint's position
         [Header("Joint Settings")]
         [SerializeField, Tooltip("The joint to update")]
         private Joint targetJoint;
@@ -21,10 +20,11 @@ namespace PullableXR
         [SerializeField, Tooltip("The rigidbody to control. If null, will try to find one on the joint's GameObject")]
         private Rigidbody targetRigidbody;
 
-        private InteractableUnityEventWrapper _eventWrapper;
+        [SerializeField] private InteractableUnityEventWrapper _eventWrapper;
         private bool _wasKinematic;
 
-        private void Start()
+        // NOTE: Setting update joint transform on Start is already too late, the joint's position is already set.
+        private void Awake()
         {
             if (targetJoint == null)
             {
@@ -33,7 +33,17 @@ namespace PullableXR
 
             if (targetJoint == null)
             {
-                Debug.LogError($"[{nameof(JointUpdateOnUnselectBehavior)}] No Joint found on {gameObject.name}");
+                return;
+            }
+            // NOTE: make sure is false to have control over the joint's position
+            targetJoint.autoConfigureConnectedAnchor = false;
+            UpdateJointTransform();
+        }
+        private void Start()
+        {
+            if (targetJoint == null)
+            {
+                Debug.LogError($"[{nameof(JointUpdateOnGrabBehavior)}] No Joint found on {gameObject.name}");
                 enabled = false;
                 return;
             }
@@ -50,21 +60,24 @@ namespace PullableXR
 
             if (targetRigidbody == null)
             {
-                Debug.LogError($"[{nameof(JointUpdateOnUnselectBehavior)}] No Rigidbody found for joint on {gameObject.name}");
-                enabled = false;
-                return;
-            }
-
-            _eventWrapper = GetComponent<InteractableUnityEventWrapper>();
-            if (_eventWrapper == null)
-            {
-                Debug.LogError($"[{nameof(JointUpdateOnUnselectBehavior)}] No InteractableUnityEventWrapper found on {gameObject.name}");
+                Debug.LogError($"[{nameof(JointUpdateOnGrabBehavior)}] No Rigidbody found for joint on {gameObject.name}");
                 enabled = false;
                 return;
             }
 
             // Store initial kinematic state
             _wasKinematic = targetRigidbody.isKinematic;
+
+            if (_eventWrapper == null)
+            {
+                _eventWrapper = GetComponent<InteractableUnityEventWrapper>();
+            }
+            if (_eventWrapper == null)
+            {
+                Debug.LogError($"[{nameof(JointUpdateOnGrabBehavior)}] No InteractableUnityEventWrapper found on {gameObject.name}");
+                enabled = false;
+                return;
+            }
 
             // Subscribe to events
             _eventWrapper.WhenSelect.AddListener(OnSelected);
@@ -88,9 +101,9 @@ namespace PullableXR
             _wasKinematic = targetRigidbody.isKinematic;
             targetRigidbody.isKinematic = true;
             // NOTE: if I don't set to false, it does not update after grab
-            targetJoint.autoConfigureConnectedAnchor = false; 
 
-            XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] On Select - Made kinematic");
+
+            XRDebugLogViewer.Log($"[{nameof(JointUpdateOnGrabBehavior)}] On Select - Made kinematic");
         }
 
         /// <summary>
@@ -110,7 +123,7 @@ namespace PullableXR
             // TODO: delay setting is kinematic back to original state 
             targetRigidbody.isKinematic = _wasKinematic;
 
-            XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] On Unselect - Restored kinematic state to {_wasKinematic}");
+            XRDebugLogViewer.Log($"[{nameof(JointUpdateOnGrabBehavior)}] On Unselect - Restored kinematic state to {_wasKinematic}");
         }
 
         /// <summary>
@@ -138,4 +151,4 @@ namespace PullableXR
             //XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] Joint transform updated");// - Position: {localPosition}, Rotation: {localRotation}");
         }
     }
-} 
+}

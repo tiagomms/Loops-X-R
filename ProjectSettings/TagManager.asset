@@ -15,6 +15,8 @@ TagManager:
   - QDSUISecondaryButton
   - QDSUIIcon
   - QDSUITextSecondaryColor
+  - Mic
+  - Orb
   layers:
   - Default
   - TransparentFX

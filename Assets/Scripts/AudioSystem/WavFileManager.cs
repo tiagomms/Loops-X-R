@@ -6,6 +6,8 @@ namespace AudioSystem
 {
     public class WavFileManager : MonoBehaviour
     {
+        public static WavFileManager Instance { get; private set; }
+
         [SerializeField] private string projectName = "DefaultProject";
 
         private IWavFileService _wavService;
@@ -13,6 +15,14 @@ namespace AudioSystem
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            
+            Instance = this;
+
             _wavService = new WavFileService(); // In future, swap to DI if needed
             _projectFolder = Path.Combine("Recordings", projectName);
             FileUtility.CreateDirectoryIfNotExists(_projectFolder);
