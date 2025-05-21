@@ -645,6 +645,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetJoint: {fileID: 3674243328614603596}
+  targetRigidbody: {fileID: 8749827756388647295}
 --- !u!1001 &961376519274145861
 PrefabInstance:
   m_ObjectHideFlags: 0
