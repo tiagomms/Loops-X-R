@@ -20,7 +20,7 @@ namespace PullableXR
         [SerializeField, Tooltip("The rigidbody to control. If null, will try to find one on the joint's GameObject")]
         private Rigidbody targetRigidbody;
 
-        private InteractableUnityEventWrapper _eventWrapper;
+        [SerializeField] private InteractableUnityEventWrapper _eventWrapper;
         private bool _wasKinematic;
 
         // NOTE: Setting update joint transform on Start is already too late, the joint's position is already set.
@@ -36,7 +36,7 @@ namespace PullableXR
                 return;
             }
             // NOTE: make sure is false to have control over the joint's position
-            targetJoint.autoConfigureConnectedAnchor = false; 
+            targetJoint.autoConfigureConnectedAnchor = false;
             UpdateJointTransform();
         }
         private void Start()
@@ -68,7 +68,10 @@ namespace PullableXR
             // Store initial kinematic state
             _wasKinematic = targetRigidbody.isKinematic;
 
-            _eventWrapper = GetComponent<InteractableUnityEventWrapper>();
+            if (_eventWrapper == null)
+            {
+                _eventWrapper = GetComponent<InteractableUnityEventWrapper>();
+            }
             if (_eventWrapper == null)
             {
                 Debug.LogError($"[{nameof(JointUpdateOnGrabBehavior)}] No InteractableUnityEventWrapper found on {gameObject.name}");
@@ -98,7 +101,7 @@ namespace PullableXR
             _wasKinematic = targetRigidbody.isKinematic;
             targetRigidbody.isKinematic = true;
             // NOTE: if I don't set to false, it does not update after grab
-            
+
 
             XRDebugLogViewer.Log($"[{nameof(JointUpdateOnGrabBehavior)}] On Select - Made kinematic");
         }
@@ -148,4 +151,4 @@ namespace PullableXR
             //XRDebugLogViewer.Log($"[{nameof(JointUpdateOnUnselectBehavior)}] Joint transform updated");// - Position: {localPosition}, Rotation: {localRotation}");
         }
     }
-} 
+}
