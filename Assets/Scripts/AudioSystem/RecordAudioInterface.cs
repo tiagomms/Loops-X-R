@@ -12,8 +12,9 @@ public class RecordAudioInterface : MonoBehaviour
     //TODO: In factory, assign micController, wavFileManager, interfaceName (later)
     private MicController micController; 
     private WavFileManager wavFileManager;
-    private ControlsManager controlsManager;
     public string interfaceName = "A";
+
+    [SerializeField] private float volumeNudgeFactor = 0.2f;
 
     // TODO: expand Interface to hold multiple AudioClips and track which one on.
     
@@ -31,40 +32,13 @@ public class RecordAudioInterface : MonoBehaviour
             Debug.LogError("MicController or WavFileManager singleton not found in scene");
             return;
         }
-
-        controlsManager = ControlsManager.Instance;
-        if (controlsManager)
-        {
-            controlsManager.Microgestures.OnTap.AddListener(ToggleRecording);
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (controlsManager)
-        {
-            controlsManager.Microgestures.OnTap.RemoveListener(ToggleRecording);
-        }
-    }
-
-    private void ToggleRecording()
-    {
-        isRecording = !isRecording;
-        if (isRecording)
-        {
-            StartRecording();
-        }
-        else
-        {
-            StopRecording();
-        }
-        XRDebugLogViewer.Log($"{gameObject.name} Is Recording: {isRecording}");
     }
 
     public void StartRecording()
     {
         EnableSound(false);
         micController.WorkStart();
+        isRecording = true;
     }
 
     public void StopRecording()
@@ -73,6 +47,7 @@ public class RecordAudioInterface : MonoBehaviour
         newClip.name = WriteTakeName();
         AssignClipToAudioSource(newClip);
         EnableSound(true);
+        isRecording = false;
     }
     
     public void PlayAudioClip()
@@ -86,7 +61,7 @@ public class RecordAudioInterface : MonoBehaviour
         audioSource.Stop();
     }
 
-    private string WriteTakeName()
+    public string WriteTakeName()
     {
         string clipName = String.Format("{0}-{1:00}", interfaceName, takeNbr);
         takeNbr++;
@@ -132,5 +107,22 @@ public class RecordAudioInterface : MonoBehaviour
     {
         StopAudioClip();
         audioSource.clip = recordedClip;
+    }
+
+    public void SetAudioSourceLooping(bool isLooping)
+    {
+        audioSource.loop = isLooping;
+    }
+
+    public bool IsAudioLooping()
+    {
+        return audioSource.loop;
+    }
+
+    public void NudgeVolume(bool isGoingUp)
+    {
+        float multFactor = isGoingUp ? 1 : -1;
+        _lastVolume = audioSource.volume;
+        audioSource.volume = Mathf.Clamp01(_lastVolume + multFactor * volumeNudgeFactor);
     }
 }

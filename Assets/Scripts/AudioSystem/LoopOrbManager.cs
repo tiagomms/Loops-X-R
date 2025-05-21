@@ -31,7 +31,7 @@ namespace XRLoopPedal.AudioSystem
             }
             else
             {
-                newOrb.SetState(LoopOrbState.OnHold);
+                newOrb.SetState(LoopOrbState.ReadyToRecord);
             }
         }
     }
