@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using Oculus.Interaction.Input;
 
 namespace XRLoopPedal.AudioSystem
 {
@@ -13,6 +14,7 @@ namespace XRLoopPedal.AudioSystem
         [SerializeField] private RecordAudioInterface recordAudioInterface;
         [SerializeField] private OrbParticleController particleController;
         [SerializeField] private OrbIdentifierUIController identifierController;
+        [SerializeField] private SoundEmitter soundEmitter;
 
         [Header("State")]
         [SerializeField] private LoopOrbState currentState;
@@ -43,13 +45,26 @@ namespace XRLoopPedal.AudioSystem
                 return;
             }
             controlsManager.Microgestures.OnTap.AddListener(ToggleRecording);
+            controlsManager.PlayPoseController.OnPoseStart.AddListener(hand => SetStateIfPossible(LoopOrbState.Playing));
+            controlsManager.StopPoseController.OnPoseStart.AddListener(hand => SetStateIfPossible(LoopOrbState.Pausing));
+
+            if (soundEmitter != null)
+            {
+                soundEmitter.onEmitSound.AddListener(TogglePlaying);
+            }
         }
 
         private void OnDestroy()
         {
-
+            if (!isInitialized) return;
             controlsManager.Microgestures.OnTap.RemoveListener(ToggleRecording);
+            controlsManager.PlayPoseController.OnPoseStart.RemoveListener(hand => SetStateIfPossible(LoopOrbState.Playing));
+            controlsManager.StopPoseController.OnPoseStart.RemoveListener(hand => SetStateIfPossible(LoopOrbState.Pausing));
 
+            if (soundEmitter != null)
+            {
+                soundEmitter.onEmitSound.RemoveListener(TogglePlaying);
+            }
         }
 
         private void Update()
@@ -90,23 +105,33 @@ namespace XRLoopPedal.AudioSystem
                 }
             }
 
+            if (soundEmitter == null)
+            {
+                soundEmitter = GetComponent<SoundEmitter>();
+                if (soundEmitter == null)
+                {
+                    Debug.LogWarning($"[{nameof(AudioOrbController)}] SoundEmitter not found on {gameObject.name}");
+                }
+            }
+
             isInitialized = true;
         }
 
         private void InitializeComponents()
         {
             if (!isInitialized) return;
-            SetState(LoopOrbState.ReadyToRecord);
+            SetStateIfPossible(LoopOrbState.ReadyToRecord);
         }
 
         #endregion
 
         #region State Management
 
-        public void SetState(LoopOrbState newState)
+        public void SetStateIfPossible(LoopOrbState newState)
         {
             if (!isInitialized) return;
             if (newState == currentState) return;
+            if (!IsValidStateTransition(newState)) return;
 
             // Handle state transition
             switch (newState)
@@ -128,74 +153,79 @@ namespace XRLoopPedal.AudioSystem
                     break;
             }
 
+            XRDebugLogViewer.Log($"Orb {gameObject.name} state changed from {currentState} to {newState}");
             currentState = newState;
             particleController.UpdateState(newState);
             identifierController.UpdateVisibility(newState);
+        }
 
+        private bool IsValidStateTransition(LoopOrbState newState)
+        {
+            return (currentState, newState) switch
+            {
+                // Can only transition to ReadyToRecord from Disabled
+                (LoopOrbState.Disabled, LoopOrbState.ReadyToRecord) => true,
+                
+                // Can only start recording from ReadyToRecord state
+                (LoopOrbState.ReadyToRecord, LoopOrbState.Recording) => true,
+                
+                // Can pause from either Recording or Playing states
+                (LoopOrbState.Recording, LoopOrbState.Pausing) => true,
+                (LoopOrbState.Playing, LoopOrbState.Pausing) => true,
+                
+                // Can only start playing from Pausing state
+                (LoopOrbState.Pausing, LoopOrbState.Playing) => true,
+                
+                // Can transition to Disabled from any state
+                (_, LoopOrbState.Disabled) => true,
+                
+                // All other transitions are invalid
+                _ => false
+            };
         }
 
         private void HandleReadyToRecord()
         {
-            // Can only transition to ReadyToRecord from Disabled
-            if (currentState != LoopOrbState.Disabled)
-            {
-                Debug.LogWarning($"[{nameof(AudioOrbController)}] Invalid state transition to ReadyToRecord from {currentState}");
-                return;
-            }
+            XRDebugLogViewer.Log($"Orb {gameObject.name} ready to record");
         }
 
         private void HandleRecording()
         {
-            // Can only start recording from ReadyToRecord state
-            if (currentState != LoopOrbState.ReadyToRecord)
-            {
-                Debug.LogWarning($"[{nameof(AudioOrbController)}] Invalid state transition to Recording from {currentState}");
-                return;
-            }
-
+            XRDebugLogViewer.Log($"Orb {gameObject.name} started recording");
             recordAudioInterface.StartRecording();
         }
 
         private void HandlePausing()
         {
-            // Can pause from either Recording or Playing states
             if (currentState == LoopOrbState.Recording)
             {
+                XRDebugLogViewer.Log($"Orb {gameObject.name} stopped recording");
                 recordAudioInterface.StopRecording();
                 identifierController.UpdateIdentifierText(recordAudioInterface.WriteTakeName());
             }
             else if (currentState == LoopOrbState.Playing)
             {
+                XRDebugLogViewer.Log($"Orb {gameObject.name} paused playback");
                 recordAudioInterface.StopAudioClip();
-            }
-            else
-            {
-                Debug.LogWarning($"[{nameof(AudioOrbController)}] Invalid state transition to Pausing from {currentState}");
-                return;
             }
         }
 
         private void HandlePlaying()
         {
-            // Can only start playing from Pausing state
-            if (currentState != LoopOrbState.Pausing)
-            {
-                Debug.LogWarning($"[{nameof(AudioOrbController)}] Invalid state transition to Playing from {currentState}");
-                return;
-            }
-
+            XRDebugLogViewer.Log($"Orb {gameObject.name} started playback");
             recordAudioInterface.PlayAudioClip();
         }
 
         private void HandleDisabled()
         {
-            // Stop any ongoing operations
             if (currentState == LoopOrbState.Recording)
             {
+                XRDebugLogViewer.Log($"Orb {gameObject.name} disabled while recording");
                 recordAudioInterface.StopRecording();
             }
             else if (currentState == LoopOrbState.Playing)
             {
+                XRDebugLogViewer.Log($"Orb {gameObject.name} disabled while playing");
                 recordAudioInterface.StopAudioClip();
             }
         }
@@ -207,11 +237,11 @@ namespace XRLoopPedal.AudioSystem
         {
             if (currentState == LoopOrbState.ReadyToRecord)
             {
-                SetState(LoopOrbState.Recording);
+                SetStateIfPossible(LoopOrbState.Recording);
             }
             else if (currentState == LoopOrbState.Recording)
             {
-                SetState(LoopOrbState.Pausing);
+                SetStateIfPossible(LoopOrbState.Pausing);
             }
         }
 
@@ -219,11 +249,11 @@ namespace XRLoopPedal.AudioSystem
         {
             if (currentState == LoopOrbState.Pausing)
             {
-                SetState(LoopOrbState.Playing);
+                SetStateIfPossible(LoopOrbState.Playing);
             }
             else if (currentState == LoopOrbState.Playing)
             {
-                SetState(LoopOrbState.Pausing);
+                SetStateIfPossible(LoopOrbState.Pausing);
             }
         }
         #endregion

@@ -24,18 +24,24 @@ namespace Utils
 {
     public class SimpleBillboard : MonoBehaviour
     {
+        [Header("Rotation Settings")]
+        [SerializeField, Range(0f, 1f)] private float rotationSpeed = 0.1f;
+
         private Camera _mainCamera;
+        private Quaternion _targetRotation;
 
         void Start()
         {
             _mainCamera = Camera.main;
+            _targetRotation = transform.rotation;
         }
 
         void Update()
         {
             var direction = transform.position - _mainCamera.transform.position;
-            var rotation = Quaternion.LookRotation(direction);
-            transform.rotation = rotation;
+            _targetRotation = Quaternion.LookRotation(direction);
+            
+            transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, rotationSpeed); 
         }
     }
 }

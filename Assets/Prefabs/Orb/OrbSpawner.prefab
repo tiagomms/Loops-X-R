@@ -295,7 +295,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6285046196684620585}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_ConstrainProportionsScale: 0
@@ -415,7 +415,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pullablePrefab: {fileID: 3084155293571431554, guid: ad02f82564dc05846abffaf5440dd43a, type: 3}
   spawnOffset: {x: 0, y: 0.1, z: 0}
-  confirmDistance: 0.3
+  confirmDistance: 0.1
   failedReleaseDuration: 0.3
   failedReleaseEase: 3
   minScale: 0.1

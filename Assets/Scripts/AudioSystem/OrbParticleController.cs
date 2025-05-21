@@ -16,6 +16,8 @@ namespace XRLoopPedal.AudioSystem
         [SerializeField, Range(0, 255)] private int alphaMin = 2;
         [SerializeField] private float colorTransitionDuration = 0.1f;
         [SerializeField] private float volumeTransitionDuration = 0.1f;
+        [SerializeField] private bool useColorTransition = false;
+        [SerializeField] private bool useVolumeTransition = false;
 
         // Private fields
         private Color currentColor;
@@ -84,19 +86,31 @@ namespace XRLoopPedal.AudioSystem
             // Kill existing volume tween if any
             volumeTween?.Kill();
 
-            // Create new volume tween
-            volumeTween = DOTween.To(
-                () => previousVolume,
-                x => {
-                    float alpha = Mathf.Lerp(_alphaMin01f, _alphaMax01f, x);
-                    var main = orbParticles.main;
-                    Color newColor = main.startColor.color;
-                    newColor.a = alpha;
-                    main.startColor = newColor;
-                },
-                targetVolume,
-                volumeTransitionDuration
-            ).SetEase(Ease.OutQuad);
+            if (useVolumeTransition)
+            {
+                // Create new volume tween
+                volumeTween = DOTween.To(
+                    () => previousVolume,
+                    x => {
+                        float alpha = Mathf.Lerp(_alphaMin01f, _alphaMax01f, x);
+                        var main = orbParticles.main;
+                        Color newColor = main.startColor.color;
+                        newColor.a = alpha;
+                        main.startColor = newColor;
+                    },
+                    targetVolume,
+                    volumeTransitionDuration
+                ).SetEase(Ease.OutQuad);
+            }
+            else
+            {
+                // Set volume immediately
+                float alpha = Mathf.Lerp(_alphaMin01f, _alphaMax01f, targetVolume);
+                var main = orbParticles.main;
+                Color newColor = main.startColor.color;
+                newColor.a = alpha;
+                main.startColor = newColor;
+            }
 
             previousVolume = targetVolume;
         }
@@ -128,13 +142,21 @@ namespace XRLoopPedal.AudioSystem
             Color targetColor = newColor;
             targetColor.a = currentAlpha;
 
-            // Tween to new color
-            colorTween = DOTween.To(
-                () => main.startColor.color,
-                x => main.startColor = x,
-                targetColor,
-                colorTransitionDuration
-            ).SetEase(Ease.OutQuad);
+            if (useColorTransition)
+            {
+                // Tween to new color
+                colorTween = DOTween.To(
+                    () => main.startColor.color,
+                    x => main.startColor = x,
+                    targetColor,
+                    colorTransitionDuration
+                ).SetEase(Ease.OutQuad);
+            }
+            else
+            {
+                // Set color immediately
+                main.startColor = targetColor;
+            }
         }
 
         #endregion

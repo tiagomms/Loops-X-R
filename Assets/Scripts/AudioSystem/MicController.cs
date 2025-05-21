@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace AudioSystem
 {
@@ -9,6 +10,7 @@ namespace AudioSystem
         private float _recordingLength;
         private AudioClip _recordedClip;
         private float _startTime;
+        private HashSet<RecordAudioInterface> activeInterfaces = new();
 
         public AudioClip RecordedClip => _recordedClip;
 
@@ -30,12 +32,26 @@ namespace AudioSystem
 
             for (int i = 0; i < Microphone.devices.Length; i++)
             {
-                Debug.Log($"Device name {i}: {Microphone.devices[i]}");
+                XRDebugLogViewer.Log($"Microphone device {i}: {Microphone.devices[i]}");
             }
 
             #if UNITY_EDITOR
-            _micIndex = micDeviceIndex; // NOTE: whatever you set on debug, usually is 0 (for deployment)
+            _micIndex = micDeviceIndex;
             #endif
+        }
+
+        public void RegisterInterface(RecordAudioInterface audioInterface)
+        {
+            if (audioInterface == null) return;
+            activeInterfaces.Add(audioInterface);
+            //XRDebugLogViewer.Log($"Registered audio interface: {audioInterface.gameObject.name}");
+        }
+
+        public void UnregisterInterface(RecordAudioInterface audioInterface)
+        {
+            if (audioInterface == null) return;
+            activeInterfaces.Remove(audioInterface);
+            //XRDebugLogViewer.Log($"Unregistered audio interface: {audioInterface.gameObject.name}");
         }
 
         public void WorkStart()
@@ -51,6 +67,7 @@ namespace AudioSystem
 
             _recordedClip = Microphone.Start(device, true, lengthSec, sampleRate);
             _startTime = Time.realtimeSinceStartup;
+            XRDebugLogViewer.Log($"Started recording with device: {device}");
 #endif
         }
 
@@ -63,6 +80,7 @@ namespace AudioSystem
             Microphone.End(null);
             _recordingLength = Time.realtimeSinceStartup - _startTime;
             _recordedClip = TrimClip(_recordedClip, _recordingLength);
+            XRDebugLogViewer.Log($"Stopped recording. Length: {_recordingLength:F2}s");
             return _recordedClip;
 #endif
             return null;
@@ -74,7 +92,7 @@ namespace AudioSystem
             int samples = Mathf.CeilToInt(clip.frequency * length);
             if (samples <= 0 || samples > clip.samples)
             {
-                Debug.LogWarning($"Invalid sample count: {samples}. Using original clip.");
+                XRDebugLogViewer.LogWarning($"Invalid sample count: {samples}. Using original clip.");
                 return clip;
             }
 
@@ -84,7 +102,7 @@ namespace AudioSystem
             // Get the audio data
             if (!clip.GetData(data, 0))
             {
-                Debug.LogError("Failed to get audio data from clip");
+                XRDebugLogViewer.LogError("Failed to get audio data from clip");
                 return clip;
             }
 
@@ -100,11 +118,20 @@ namespace AudioSystem
             // Set the data
             if (!trimmedClip.SetData(data, 0))
             {
-                Debug.LogError("Failed to set audio data to trimmed clip");
+                XRDebugLogViewer.LogError("Failed to set audio data to trimmed clip");
                 return clip;
             }
 
             return trimmedClip;
+        }
+
+        private void OnDestroy()
+        {
+            if (isWorking)
+            {
+                WorkStop();
+            }
+            activeInterfaces.Clear();
         }
     }
 }

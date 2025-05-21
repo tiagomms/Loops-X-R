@@ -12,7 +12,7 @@ public class RecordAudioInterface : MonoBehaviour
     //TODO: In factory, assign micController, wavFileManager, interfaceName (later)
     private MicController micController; 
     private WavFileManager wavFileManager;
-    public string interfaceName = "A";
+    public string interfaceName = "";  // Start with empty name
 
     [SerializeField] private float volumeNudgeFactor = 0.2f;
 
@@ -32,6 +32,17 @@ public class RecordAudioInterface : MonoBehaviour
             Debug.LogError("MicController or WavFileManager singleton not found in scene");
             return;
         }
+    }
+
+    public void SetInterfaceName(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+        {
+            XRDebugLogViewer.LogWarning($"Attempted to set empty interface name on {gameObject.name}");
+            return;
+        }
+        interfaceName = name;
+        //XRDebugLogViewer.Log($"Interface name set to {name} on {gameObject.name}");
     }
 
     public void StartRecording()
