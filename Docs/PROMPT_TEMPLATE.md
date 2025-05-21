@@ -217,6 +217,19 @@
   - Required documentation or resources
   - Assumptions made
   - Uncertainties
+- Documentation Style:
+  - Use concise, emoji-rich documentation for better readability
+  - Mark features and components with relevant emojis
+  - Make documentation scannable and visually engaging
+  - Use emojis to highlight key points and sections
+  - Example:
+    ```
+    ## Features
+    - 🎮 Game mechanics
+    - 🎨 Visual effects
+    - 🔊 Audio system
+    - 🎯 Core functionality
+    ```
 
 ## Project Setup
 

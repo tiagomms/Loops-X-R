@@ -1,69 +1,60 @@
 # XR Loop Pedal - Orb System Architecture
 
-## Overview
-The orb system is designed to handle audio recording and playback in a loop pedal style interface. Each orb represents a single audio track that can be recorded, played, and paused independently.
+> 💡 **Documentation Style**: This project uses concise, emoji-rich documentation for better readability and visual organization. Each feature and component is marked with relevant emojis to make the documentation more scannable and engaging.
+
+This system enables audio recording and playback in a loop pedal style interface, with each orb representing a single audio track that can be recorded, played, and paused independently. The system uses a centralized `MicController` to manage recording sessions across multiple orbs.
+
+## Features
+
+- 🎙️ Centralized recording management via MicController
+- 🎯 State-based orb behavior (Ready, Recording, Pausing, Playing)
+- 🎨 Visual feedback with particle effects and color transitions
+- 🔊 Volume-based particle alpha adjustments
+- 🎵 Interface naming system (A, B, C, etc.)
+- ⚡ Smooth transitions using DOTween
+- 🧠 Event-based communication between components
+
+---
 
 ## Core Components
 
-### 1. AudioOrbController
-The main controller that coordinates between audio and visual components.
+### 1. MicController
+- Singleton pattern for global access
+- Manages recording state across all orbs
+- Handles tap gestures for recording control
+- Assigns interface names to orbs
+- Increments interface letter after each recording session
 
-#### State Management
-The orb operates as a state machine with the following states:
+### 2. AudioOrbController
+- Coordinates between audio and visual components
+- Manages state transitions
+- Handles playback control
+- Integrates with ControlsManager for gestures
+
+### 3. OrbParticleController
+- Handles visual feedback
+- Color transitions based on state
+- Alpha level based on audio volume
+- Smooth transitions using DOTween
+
+### 4. RecordAudioInterface
+- Audio recording and playback
+- Volume management
+- File saving/loading
+- Interface naming
+
+---
+
+## State Management
+
+### Orb States
 - `ReadyToRecord`: Initial state, ready to start recording
 - `Recording`: Currently recording audio
 - `Pausing`: Transitional state between recording/playing
 - `Playing`: Playing back recorded audio
 - `Disabled`: Orb is inactive
 
-#### State Transitions
-```mermaid
-stateDiagram-v2
-    [*] --> ReadyToRecord
-    ReadyToRecord --> Recording
-    Recording --> Pausing
-    Pausing --> Playing
-    Playing --> Pausing
-    Pausing --> ReadyToRecord
-    any --> Disabled
-```
-
-#### Valid State Transitions
-- `ReadyToRecord` → `Recording`: Start new recording
-- `Recording` → `Pausing`: Stop recording
-- `Playing` → `Pausing`: Stop playback
-- `Pausing` → `Playing`: Start playback
-- Any state → `Disabled`: Emergency stop
-
-### 2. OrbParticleController
-Handles all visual feedback for the orb state and audio levels.
-
-#### Features
-- Color transitions based on state
-- Alpha level based on audio volume
-- Smooth transitions using DOTween
-
-#### Configuration
-```csharp
-[Header("Alpha Settings")]
-[SerializeField] private float alphaMax = 20f;    // Maximum alpha at full volume
-[SerializeField] private float alphaMin = 2f;     // Minimum alpha at zero volume
-[SerializeField] private float colorTransitionDuration = 0.3f;  // Color change speed
-[SerializeField] private float volumeTransitionDuration = 0.1f; // Volume change speed
-```
-
-### 3. RecordAudioInterface
-Handles the actual audio recording and playback functionality.
-
-#### Features
-- Audio recording
-- Playback control
-- Volume management
-- File saving/loading
-
-## State Colors
-Colors are managed through the `LoopOrbStateColors` ScriptableObject:
-
+### State Colors
 | State | Default Color | Description |
 |-------|--------------|-------------|
 | ReadyToRecord | Green (0.2, 0.8, 0.2) | Ready to start recording |
@@ -72,47 +63,62 @@ Colors are managed through the `LoopOrbStateColors` ScriptableObject:
 | Playing | Blue (0.2, 0.2, 0.8) | Playing back audio |
 | Disabled | Gray (0.5, 0.5, 0.5) | Inactive state |
 
+---
+
 ## Setup Instructions
 
-1. Create an orb GameObject with:
-   - AudioOrbController
-   - OrbParticleController
-   - ParticleSystem (child object)
-   - RecordAudioInterface
+1. **MicController Setup**
+   - Add MicController to scene
+   - Configure ControlsManager reference
+   - Set up tap gesture handling
 
-2. Configure the OrbParticleController:
-   - Assign the ParticleSystem reference
-   - Adjust alpha and transition settings
+2. **Orb Setup**
+   - Create orb GameObject
+   - Add required components:
+     - AudioOrbController
+     - OrbParticleController
+     - ParticleSystem (child)
+     - RecordAudioInterface
 
-3. Configure the AudioOrbController:
-   - Assign the RecordAudioInterface reference
-   - Assign the OrbParticleController reference
+3. **Configuration**
+   - Adjust particle settings (alpha, transitions)
+   - Configure audio settings
+   - Set up state colors
 
-## Usage Example
+---
 
+## Integration
+
+### MicController Registration
 ```csharp
-// Get reference to orb controller
-AudioOrbController orb = GetComponent<AudioOrbController>();
+// Register orb with MicController
+MicController.Instance.RegisterOrb(audioOrbController);
 
-// Start recording
-orb.SetState(LoopOrbState.Recording);
-
-// Stop recording
-orb.SetState(LoopOrbState.Pausing);
-
-// Play recorded audio
-orb.SetState(LoopOrbState.Playing);
+// Unregister when done
+MicController.Instance.UnregisterOrb(audioOrbController);
 ```
 
+### State Management
+```csharp
+// State changes are handled through MicController events
+// Recording starts/stops are controlled by tap gestures
+// Playback is controlled by play/stop gestures
+```
+
+---
+
 ## Error Handling
-The system includes comprehensive error checking:
-- Invalid state transitions are logged
-- Missing components are detected at startup
-- Audio operations are validated
-- Visual transitions are protected against null references
+- 🚫 Invalid state transitions are logged
+- 🔍 Missing components are detected at startup
+- ✅ Audio operations are validated
+- 🛡️ Visual transitions are protected against null references
+- 🔒 MicController singleton validation
+- 📝 Orb registration validation
 
 ## Performance Considerations
-- Uses DOTween for efficient animations
-- Volume changes are smoothed to prevent visual jitter
-- State changes are validated before execution
-- Particle system updates are optimized 
+- ⚡ Uses DOTween for efficient animations
+- 🎯 Volume changes are smoothed to prevent jitter
+- 🔄 State changes are validated before execution
+- 🎨 Particle system updates are optimized
+- 🎙️ Centralized recording management prevents conflicts
+- 📡 Event-based communication reduces coupling 

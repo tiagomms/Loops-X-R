@@ -1,7 +1,7 @@
 # Sample Assets Management
 
 ## Overview
-This document tracks the sample assets used in the project, their modifications, and their locations.
+This document tracks the sample assets used in the project, their modifications, and their locations. Documentation follows a concise, emoji-rich style for better readability and visual organization.
 
 ## Sample Assets Structure
 ```

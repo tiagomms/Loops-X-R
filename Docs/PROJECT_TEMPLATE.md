@@ -24,6 +24,10 @@
 ### Project Guidelines
 - [ ] Coding Standards Document Created
 - [ ] Documentation Template Created
+  - Use concise, emoji-rich documentation
+  - Mark features with relevant emojis
+  - Make documentation scannable
+  - Use emojis for key points
 - [ ] Asset Organization Structure Defined
 - [ ] Naming Conventions Established
 
