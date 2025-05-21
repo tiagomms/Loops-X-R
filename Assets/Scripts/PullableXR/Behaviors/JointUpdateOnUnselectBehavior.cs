@@ -122,7 +122,7 @@ namespace PullableXR
 
             // Update joint's connected anchor to maintain the same relative position
             //Vector3 localPosition = transform.InverseTransformPoint(targetJoint.transform.position);
-            //targetJoint.connectedAnchor = targetJoint.transform.position;
+            targetJoint.connectedAnchor = targetJoint.transform.position;
 
             /*
             // Update joint's connected anchor rotation to maintain the same relative rotation
