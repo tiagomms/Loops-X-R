@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using Oculus.Interaction.Input;
+using AudioSystem;
 
 namespace XRLoopPedal.AudioSystem
 {
@@ -11,7 +12,7 @@ namespace XRLoopPedal.AudioSystem
     public class AudioOrbController : MonoBehaviour
     {
         [Header("Dependencies")]
-        [SerializeField] private RecordAudioInterface recordAudioInterface;
+        [SerializeField] public RecordAudioInterface recordAudioInterface;
         [SerializeField] private OrbParticleController particleController;
         [SerializeField] private OrbIdentifierUIController identifierController;
         [SerializeField] private SoundEmitter soundEmitter;
@@ -25,7 +26,6 @@ namespace XRLoopPedal.AudioSystem
         // Private fields
         private ControlsManager controlsManager;
         private bool isInitialized;
-
 
         #region Unity Lifecycle
 
@@ -44,7 +44,10 @@ namespace XRLoopPedal.AudioSystem
                 isInitialized = false;
                 return;
             }
-            controlsManager.Microgestures.OnTap.AddListener(ToggleRecording);
+
+            // Subscribe to MicController's recording state changes
+            MicController.Instance.OnRecordingStateChanged.AddListener(HandleRecordingStateChanged);
+            
             controlsManager.PlayPoseController.OnPoseStart.AddListener(hand => SetStateIfPossible(LoopOrbState.Playing));
             controlsManager.StopPoseController.OnPoseStart.AddListener(hand => SetStateIfPossible(LoopOrbState.Pausing));
 
@@ -52,12 +55,21 @@ namespace XRLoopPedal.AudioSystem
             {
                 soundEmitter.onEmitSound.AddListener(TogglePlaying);
             }
+
+            // Register with MicController
+            MicController.Instance.RegisterOrb(this);
         }
 
         private void OnDestroy()
         {
             if (!isInitialized) return;
-            controlsManager.Microgestures.OnTap.RemoveListener(ToggleRecording);
+
+            if (MicController.Instance != null)
+            {
+                MicController.Instance.OnRecordingStateChanged.RemoveListener(HandleRecordingStateChanged);
+                MicController.Instance.UnregisterOrb(this);
+            }
+
             controlsManager.PlayPoseController.OnPoseStart.RemoveListener(hand => SetStateIfPossible(LoopOrbState.Playing));
             controlsManager.StopPoseController.OnPoseStart.RemoveListener(hand => SetStateIfPossible(LoopOrbState.Pausing));
 
@@ -233,13 +245,14 @@ namespace XRLoopPedal.AudioSystem
         #endregion
 
         #region Event Management
-        private void ToggleRecording()
+
+        private void HandleRecordingStateChanged(bool isRecording)
         {
-            if (currentState == LoopOrbState.ReadyToRecord)
+            if (isRecording && currentState == LoopOrbState.ReadyToRecord)
             {
                 SetStateIfPossible(LoopOrbState.Recording);
             }
-            else if (currentState == LoopOrbState.Recording)
+            else if (!isRecording && currentState == LoopOrbState.Recording)
             {
                 SetStateIfPossible(LoopOrbState.Pausing);
             }

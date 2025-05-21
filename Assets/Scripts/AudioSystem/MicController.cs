@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.Events;
+using XRLoopPedal.AudioSystem;
 
 namespace AudioSystem
 {
@@ -10,7 +13,8 @@ namespace AudioSystem
         private float _recordingLength;
         private AudioClip _recordedClip;
         private float _startTime;
-        private HashSet<RecordAudioInterface> activeInterfaces = new();
+        private char _currentInterfaceLetter = 'A';
+        private HashSet<AudioOrbController> _activeOrbs = new();
 
         public AudioClip RecordedClip => _recordedClip;
 
@@ -19,6 +23,9 @@ namespace AudioSystem
         [Tooltip("Set respective index - wait for Awake method to know which one to select. In production - this value is ignored to default value 0")]
         [SerializeField] private int micDeviceIndex = 1;
         private int _micIndex = 0;
+
+        // Event for recording state changes
+        public UnityEvent<bool> OnRecordingStateChanged = new UnityEvent<bool>();
 
         private void Awake()
         {
@@ -40,23 +47,60 @@ namespace AudioSystem
             #endif
         }
 
-        public void RegisterInterface(RecordAudioInterface audioInterface)
+        private void Start()
         {
-            if (audioInterface == null) return;
-            activeInterfaces.Add(audioInterface);
-            //XRDebugLogViewer.Log($"Registered audio interface: {audioInterface.gameObject.name}");
+            // Subscribe to tap gesture
+            ControlsManager.Instance.Microgestures.OnTap.AddListener(HandleTap);
         }
 
-        public void UnregisterInterface(RecordAudioInterface audioInterface)
+        private void OnDestroy()
         {
-            if (audioInterface == null) return;
-            activeInterfaces.Remove(audioInterface);
-            //XRDebugLogViewer.Log($"Unregistered audio interface: {audioInterface.gameObject.name}");
+            if (ControlsManager.Instance != null)
+            {
+                ControlsManager.Instance.Microgestures.OnTap.RemoveListener(HandleTap);
+            }
+            OnRecordingStateChanged.RemoveAllListeners();
+        }
+
+        private void HandleTap()
+        {
+            if (isWorking)
+            {
+                WorkStop();
+                OnRecordingStateChanged.Invoke(false);
+            }
+            else
+            {
+                WorkStart();
+                OnRecordingStateChanged.Invoke(true);
+            }
+        }
+
+        public void RegisterOrb(AudioOrbController orb)
+        {
+            if (orb == null) return;
+            _activeOrbs.Add(orb);
+        }
+
+        public void UnregisterOrb(AudioOrbController orb)
+        {
+            if (orb == null) return;
+            _activeOrbs.Remove(orb);
         }
 
         public void WorkStart()
         {
             if (isWorking) return;
+
+            // Find all orbs ready to record
+            var readyOrbs = _activeOrbs.Where(orb => orb.CurrentState == LoopOrbState.ReadyToRecord).ToList();
+            if (readyOrbs.Count == 0) return;
+
+            // Set interface name for all ready orbs
+            foreach (var orb in readyOrbs)
+            {
+                orb.recordAudioInterface.SetInterfaceName(_currentInterfaceLetter.ToString());
+            }
 
 #if !UNITY_WEBGL
             isWorking = true;
@@ -81,6 +125,10 @@ namespace AudioSystem
             _recordingLength = Time.realtimeSinceStartup - _startTime;
             _recordedClip = TrimClip(_recordedClip, _recordingLength);
             XRDebugLogViewer.Log($"Stopped recording. Length: {_recordingLength:F2}s");
+            
+            // Increment interface letter for next recording
+            _currentInterfaceLetter++;
+            
             return _recordedClip;
 #endif
             return null;
@@ -123,15 +171,6 @@ namespace AudioSystem
             }
 
             return trimmedClip;
-        }
-
-        private void OnDestroy()
-        {
-            if (isWorking)
-            {
-                WorkStop();
-            }
-            activeInterfaces.Clear();
         }
     }
 }
