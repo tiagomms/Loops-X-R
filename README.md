@@ -1,5 +1,9 @@
 # XR Loop Pedal Project 🎵
 
+## Quick Links 🔗
+- 🎥 [Watch Demo Video](https://drive.google.com/file/d/1daowOEFNYDltVPYm5IAgCOAhwexOYp5j/view?usp=drive_link)
+- 📱 [Download APK](https://drive.google.com/file/d/1TwnAMkd7zP5h3_7E6xhXxowMyJdCQ_kw/view?usp=drive_link)
+
 ## Overview 🎯
 This project is the first one-week solo prototype developed for the XR Bootcamp XR Prototyping course (May-July 2025). It implements a loop pedal system in VR, allowing users to record, play, and layer audio loops in a spatial environment. Built with Unity and Meta XR SDK v76, it provides an intuitive and immersive audio manipulation experience.
 
@@ -150,13 +154,6 @@ Project Root/
 - Boss Loop Station
 - Ableton Live layout
 
-### AI Models & Tools
-- [MT3](https://huggingface.co/spaces/Hmjz100/MT3) - Audio to MIDI conversion
-- [Riffusion-Melodiff](https://huggingface.co/spaces/JanBabela/Riffusion-Melodiff-v1) - Instrument transformation
-- [MusicVision](https://huggingface.co/spaces/Genius-Society/MusicVision) - Audio to video
-- [ACE-Step](https://huggingface.co/spaces/ACE-Step/ACE-Step) - Song generation
-- [Demucs](https://huggingface.co/spaces/nakas/demucs_playground) - Audio separation
-
 ## Key Learning Points 📚
 
 ### Technical Achievements 🎯
@@ -180,10 +177,8 @@ Project Root/
 - 📊 WAV file creation and microphone recording/saving requires optimization
 - 🔍 Raw microphone data access is essential
 
-## License 📄
-MIT License
 
-## Stretch Goals 🚀
+#### Stretch Goals 🚀
 Features for future implementation:
 - Get Quest Microphone raw data (without any filter)
 - 🔊 Volume control for recorded play
@@ -193,12 +188,15 @@ Features for future implementation:
 - 🎚️ Audio control knobs
 - 🎵 Moving bubble recordings
 - 🤖 AI Integration:
-  - Audio to MIDI conversion
-  - Lyrics extraction
-  - Instrument transformation
-  - Audio to video generation
-  - Song iteration/generation
-  - Object segmentation
+   - [MT3](https://huggingface.co/spaces/Hmjz100/MT3) - Audio to MIDI conversion
+   - [Riffusion-Melodiff](https://huggingface.co/spaces/JanBabela/Riffusion-Melodiff-v1) - Instrument transformation
+   - [MusicVision](https://huggingface.co/spaces/Genius-Society/MusicVision) - Audio to video
+   - [ACE-Step](https://huggingface.co/spaces/ACE-Step/ACE-Step) - Song generation
+   - [Demucs](https://huggingface.co/spaces/nakas/demucs_playground) - Audio separation
 - 🌟 Project auras
 - 📸 Memory palace integration
 - 🎧 Augmented music player features
+
+
+## License 📄
+MIT License
