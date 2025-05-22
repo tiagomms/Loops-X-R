@@ -157,11 +157,35 @@ Project Root/
 - [ACE-Step](https://huggingface.co/spaces/ACE-Step/ACE-Step) - Song generation
 - [Demucs](https://huggingface.co/spaces/nakas/demucs_playground) - Audio separation
 
+## Key Learning Points 📚
+
+### Technical Achievements 🎯
+- 🏗️ Built a full prototype using Meta XR SDKs
+- 🔐 Implemented Quest feature permissions
+- 🎙️ Implemented Quest audio recording and playback
+- 🎮 Handled multiple grabbable objects with different logics
+- 🎯 Created spawner prefab agnostic with room for customization
+- 👆 Implemented pinch and grab detection
+- 🤖 Used AI-integrated IDE for development
+
+### Personal Growth 🌱
+- ⚖️ Beginning to balance ambition with practical constraints
+- 🎯 Focused on core functionality over perfect implementation
+- 🤝 Developed better AI prompting strategies
+
+### Prototype Evaluation 🎯
+
+#### Current Status
+- 🎙️ Microphone quality/sampling needs fine-tuning
+- 📊 WAV file creation and microphone recording/saving requires optimization
+- 🔍 Raw microphone data access is essential
+
 ## License 📄
 MIT License
 
 ## Stretch Goals 🚀
 Features for future implementation:
+- Get Quest Microphone raw data (without any filter)
 - 🔊 Volume control for recorded play
 - ✂️ Edit single samples
 - 📂 Project management (new/load)
