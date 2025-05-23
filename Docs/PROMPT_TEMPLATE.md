@@ -121,8 +121,74 @@
 - AI will ask clarifying questions about incomplete prompts
 - AI will maintain a list of TODO items from stashed prompts
 
+### Mode Toggling
+- Magic Phrase for Prototyping Mode:
+  - Simply state: "Please use prototyping mode."
+  - This will make AI:
+    a. Use simplified error handling
+    b. Minimize documentation
+    c. Focus on rapid development
+    d. Use basic patterns
+    e. Keep code structure simple
+
+- Magic Phrase for Production Mode:
+  - Simply state: "Please use production mode."
+  - This will make AI:
+    a. Use comprehensive error handling
+    b. Provide detailed documentation
+    c. Follow strict SOLID principles
+    d. Use industry-standard patterns
+    e. Implement robust architecture
+
 ### Code Quality Standards
-- Follow SOLID principles unless explicitly stated otherwise
+
+#### Prototyping Mode (Default)
+- Follow basic SOLID principles
+- Keep code simple and readable
+- Use clear, descriptive names
+- Document essential functionality
+- Basic error checking
+- Type safety where practical
+- Code Readability Standards:
+  - Prefer simple inheritance over complex patterns
+  - Use interfaces for clear contracts
+  - Keep methods focused and small
+  - Use consistent patterns
+  - Document key design decisions
+  - Common patterns to consider:
+    a. Simple inheritance for shared behavior
+    b. Basic interfaces for contracts
+    c. Direct method calls over complex patterns
+  - Documentation requirements:
+    1. Explain key functionality
+    2. Document important decisions
+    3. Include basic usage examples
+- String standards:
+  - Use double quotes (`"`)
+  - Use string templates
+- Error Handling Standards:
+  - Log errors with basic context
+  - Use simple validation
+  - Avoid complex try-catch blocks
+  - Basic error message format:
+    ```csharp
+    Debug.LogError($"[{nameof(ClassName)}] {errorMessage}");
+    ```
+- Game Design Patterns:
+  - Use simple, proven patterns
+  - Focus on functionality over architecture
+  - Common patterns include:
+    a. Basic Observer: For simple event handling
+    b. Simple Factory: For object creation
+    c. Component Pattern: For game object behaviors
+- Code State Preservation:
+  - Keep existing code structure
+  - Ask before making major changes
+  - Preserve debugging code
+  - Maintain basic organization
+
+#### Production Mode
+- Follow SOLID principles strictly
 - Production-ready code with clear documentation
 - Comprehensive inline comments
 - Error checking and type validation
@@ -406,4 +472,178 @@ Project Root/
      e. Document the approved deviation
 
 ### Error Correction
-// ... rest of existing content ... 
+// ... rest of existing content ...
+
+### Code Comments and Special Keywords
+
+#### Special Comment Keywords
+Use the following special comment keywords to highlight important code annotations. These will be color-coded in most modern IDEs:
+
+```csharp
+// TODO: Indicates code that needs to be implemented or completed
+// FIXME: Marks code that needs to be fixed or improved
+// BUG: Indicates a known bug that needs to be addressed
+// HACK: Marks a workaround or temporary solution
+// REVIEW: Indicates code that needs to be reviewed
+// NOTE: Important information about the code
+// OPTIMIZE: Marks code that needs performance optimization
+// DEPRECATED: Indicates code that should not be used
+// TEST: Marks code that needs testing
+// DOC: Indicates documentation that needs to be updated
+```
+
+#### Comment Guidelines
+- Use special keywords consistently across the project
+- Include a brief description after the keyword
+- Add your initials or name for accountability (e.g., `// TODO(tiago): Implement feature X`)
+- Remove or update comments when the task is completed
+- Use these comments sparingly and meaningfully
+
+Example usage:
+```csharp
+// TODO(tiago): Implement player movement
+// FIXME(john): Handle edge case when player falls off map
+// BUG: Physics calculation incorrect at high velocities
+// HACK: Temporary solution until proper API is available
+// REVIEW: Consider using object pooling for better performance
+```
+
+#### Better Comments Configuration
+To enable consistent comment highlighting across all projects, add the following configuration to your `.vscode/settings.json`:
+
+```json
+{
+    "better-comments.tags": [
+        {
+            "tag": "!",
+            "color": "#FF0000",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "?",
+            "color": "#3498DB",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "//",
+            "color": "#474747",
+            "strikethrough": true,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "todo",
+            "color": "#FF8C00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "fixme",
+            "color": "#FF0000",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "bug",
+            "color": "#FF0000",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "hack",
+            "color": "#FFD700",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "review",
+            "color": "#00BFFF",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "note",
+            "color": "#32CD32",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "optimize",
+            "color": "#9370DB",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "deprecated",
+            "color": "#808080",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "test",
+            "color": "#20B2AA",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "doc",
+            "color": "#4169E1",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
+        }
+    ]
+}
+```
+
+##### Setup Instructions
+1. Install the "Better Comments" extension in your IDE
+2. Create a `.vscode` folder in your project root if it doesn't exist
+3. Create or update `settings.json` inside the `.vscode` folder with the above configuration
+4. Reload your IDE to apply the changes
+
+##### Additional Comment Types
+- `// !` - Important comments (Red)
+- `// ?` - Questions (Blue)
+- `//` - Strikethrough comments (Gray)
+
+// ... existing code ... 

@@ -1,5 +1,26 @@
 # Unity/C# Coding Standards
 
+## Mode Selection
+The project can operate in two modes:
+
+### Prototyping Mode (Default)
+- Focus on rapid development
+- Simplified error handling
+- Minimal documentation
+- Basic patterns
+- Simple code structure
+
+### Production Mode
+- Focus on code quality
+- Comprehensive error handling
+- Detailed documentation
+- Industry-standard patterns
+- Robust architecture
+
+To switch modes, use these magic phrases:
+- "Please use prototyping mode."
+- "Please use production mode."
+
 ## Naming Conventions
 
 ### Classes and Interfaces
@@ -49,7 +70,18 @@
 
 ## Documentation
 
-### Documentation Style
+### Prototyping Mode
+- Keep documentation concise and focused
+- Use emojis sparingly for key sections only
+- Focus on essential information
+- Example:
+  ```
+  ## Features
+  - 🎮 Core mechanics
+  - 🎯 Key functionality
+  ```
+
+### Production Mode
 - Use concise, emoji-rich documentation for better readability
 - Mark features and components with relevant emojis
 - Make documentation scannable and visually engaging
@@ -64,6 +96,15 @@
   ```
 
 ### Class Documentation
+#### Prototyping Mode
+```csharp
+/// <summary>
+/// Brief description of the class's purpose
+/// </summary>
+public class YourClassName : MonoBehaviour
+```
+
+#### Production Mode
 ```csharp
 /// <summary>
 /// Brief description of the class's purpose
@@ -75,6 +116,15 @@ public class YourClassName : MonoBehaviour
 ```
 
 ### Method Documentation
+#### Prototyping Mode
+```csharp
+/// <summary>
+/// Brief description of what the method does
+/// </summary>
+public ReturnType MethodName(ParamType paramName)
+```
+
+#### Production Mode
 ```csharp
 /// <summary>
 /// Brief description of what the method does
@@ -86,11 +136,40 @@ public ReturnType MethodName(ParamType paramName)
 ```
 
 ### Field Documentation
+#### Prototyping Mode
+```csharp
+[SerializeField] private Type _fieldName;
+```
+
+#### Production Mode
 ```csharp
 [Header("Configuration")]
 [Tooltip("Description of what this field is used for")]
 [SerializeField] private Type _fieldName;
 ```
+
+## Error Handling
+
+### Prototyping Mode
+- Use simple validation in Awake/Start
+- Log errors with basic context
+- Avoid complex try-catch blocks
+- Use Debug.LogWarning for recoverable issues
+- Use Debug.LogError for critical issues
+- Basic error message format:
+  ```csharp
+  Debug.LogError($"[{nameof(ClassName)}] {errorMessage}");
+  ```
+
+### Production Mode
+- Use try-catch blocks for expected exceptions
+- Log errors with appropriate context
+- Use Debug.LogWarning for recoverable issues
+- Use Debug.LogError for critical issues
+- Comprehensive error message format:
+  ```csharp
+  Debug.LogError($"[{nameof(ClassName)}] Error in {methodName} for {objectName}: {e.Message}\nStack Trace: {e.StackTrace}");
+  ```
 
 ## Code Comments and Special Keywords
 
@@ -285,12 +364,6 @@ To enable consistent comment highlighting across all projects, add the following
 - Consider comfort and safety in VR
 - Use appropriate VR interaction patterns
 - Consider performance implications of VR rendering
-
-## Error Handling
-- Use try-catch blocks for expected exceptions
-- Log errors with appropriate context
-- Use Debug.LogWarning for recoverable issues
-- Use Debug.LogError for critical issues
 
 ## Version Control
 - Write meaningful commit messages
