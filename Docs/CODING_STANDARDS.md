@@ -10,6 +10,65 @@ The project can operate in two modes:
 - Basic patterns
 - Simple code structure
 
+#### Code Organization
+1. Field Organization
+   - Group related fields under descriptive headers
+   - Use [Header] for logical grouping
+   - Use [Space] for visual separation
+   - Keep field names clear and descriptive
+   - Use [SerializeField] for private fields that need Inspector access
+
+2. Method Organization
+   - Use regions to group related functionality
+   - Keep methods focused and single-purpose
+   - Maximum method length: 30-40 lines
+   - Use early returns to reduce nesting
+   - Document only public methods and key private methods
+
+3. Documentation Style
+   - Keep documentation concise and focused
+   - Use XML comments only for public methods and key private methods
+   - Focus on explaining "what" rather than "how"
+   - Avoid redundant comments on obvious code
+   - Use clear, descriptive method names that explain their purpose
+
+4. Error Handling
+   - Use simple validation in Awake/Start
+   - Log errors with basic context
+   - Avoid complex try-catch blocks
+   - Use Debug.LogWarning for recoverable issues
+   - Use Debug.LogError for critical issues
+   - Basic error message format:
+     ```csharp
+     Debug.LogError($"[{nameof(ClassName)}] {errorMessage}");
+     ```
+
+5. Code Structure
+   - Use regions to organize code sections
+   - Group related functionality together
+   - Keep classes focused on a single responsibility
+   - Use clear, descriptive names
+   - Follow Unity's component naming conventions
+
+6. Unity Specific
+   - Cache component references in Awake()
+   - Use [RequireComponent] when a component is mandatory
+   - Use [SerializeField] instead of public for Inspector fields
+   - Use [Header] and [Space] for better Inspector organization
+   - Use [Range] for numeric fields that should be constrained
+
+7. Performance
+   - Avoid GetComponent() in Update()
+   - Cache Transform component if used frequently
+   - Use coroutines for time-based operations
+   - Use events instead of Update() when possible
+
+8. VR Specific
+   - Handle both controller and hand tracking input
+   - Consider comfort and safety in VR
+   - Use appropriate VR interaction patterns
+   - Consider performance implications of VR rendering
+
 ### Production Mode
 - Focus on code quality
 - Comprehensive error handling
